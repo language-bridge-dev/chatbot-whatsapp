@@ -18,6 +18,24 @@ function getUserSession(chatId) {
   return userSessions[chatId];
 }
 
+setInterval(function() {
+    console.log('check now');
+    if(userSessions){
+        Object.keys(userSessions).forEach(function(chatId, user) {
+            if(user.done){
+                return
+            }
+            const now = Date.now();
+            if (((now-user.lastSendTime)/60000) < 2){
+                return
+            }
+            bot.sendMessage(chatId,`Hello ${applicantName}, please, remember that you must complete this verification before your exam. Otherwise, this can be postponed or suspended. I would like to retake the verification in the last step concluded.`);
+        });
+    } else {
+        console.log('no users found');
+    }
+},60000)
+
 function setLastSendTime(chatId) {
     console.log('user just sent something', userSessions[chatId]);
     userSessions[chatId].lastSendTime = Date.now();
@@ -170,20 +188,3 @@ export async function POST(req) {
   }
 }
 
-setInterval(()=>{
-    console.log('check now');
-    if(userSessions){
-        Object.keys(userSessions).forEach(function(chatId, user) {
-            if(user.done){
-                return
-            }
-            const now = Date.now();
-            if (((now-user.lastSendTime)/60000) < 2){
-                return
-            }
-            bot.sendMessage(chatId,`Hello ${applicantName}, please, remember that you must complete this verification before your exam. Otherwise, this can be postponed or suspended. I would like to retake the verification in the last step concluded.`);
-        });
-    } else {
-        console.log('no users found');
-    }
-},60000)
