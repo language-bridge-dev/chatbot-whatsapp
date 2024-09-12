@@ -94,7 +94,7 @@ export async function POST(req) {
     }
 
     if (screenshot){
-        console.log('photo'+photo);
+        console.log('photo'+screenshot);
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
