@@ -19,6 +19,7 @@ function getUserSession(chatId) {
 }
 
 function setLastSendTime(chatId) {
+    console.log('user just sent something', userSessions[chatId]);
     userSessions[chatId].lastSendTime = Date.now();
 }
 
@@ -55,7 +56,7 @@ export async function POST(req) {
                 ],
             },
         });
-    } else {
+    } else if (text && text !== '/start') {
         await bot.sendMessage(chatId,'Please select from the menu or /start to start over(if you already provide a screenshots it will not change or delete).')
     }
 
@@ -170,6 +171,7 @@ export async function POST(req) {
 }
 
 setInterval(()=>{
+    console.log('check now');
     if(userSessions){
         Object.keys(userSessions).forEach(function(chatId, user) {
             if(user.done){
@@ -181,5 +183,7 @@ setInterval(()=>{
             }
             bot.sendMessage(chatId,`Hello ${applicantName}, please, remember that you must complete this verification before your exam. Otherwise, this can be postponed or suspended. I would like to retake the verification in the last step concluded.`);
         });
+    } else {
+        console.log('no users found');
     }
 },60000)
