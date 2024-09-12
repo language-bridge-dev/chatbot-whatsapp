@@ -3,9 +3,10 @@ import TelegramBot from 'node-telegram-bot-api';
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { webHook: true });
 
+let name = '';
+
 export async function POST(req) {
   try {
-    let name='';
     const body = await req.json();
     if (body.message) {
       const chatId = body.message.chat?.id;
