@@ -6,7 +6,7 @@ const bot = new TelegramBot(token, { webHook: true });
 export async function POST(req) {
   try {
     const body = await req.json();
-
+    let name;
     if (body.message) {
       const chatId = body.message.chat?.id;
       const text = body.message.text;
@@ -18,6 +18,7 @@ export async function POST(req) {
       if (text === '/start') {
         await bot.sendMessage(chatId, "Hello, I'm a bot, please write your name.");
       } else {
+        name=text;
         await bot.sendMessage(chatId, `Hello ${text}, please select your country:`, {
           reply_markup: {
             inline_keyboard: [
@@ -40,7 +41,7 @@ export async function POST(req) {
         throw new Error('chatId is missing in callback_query');
       }
 
-      await bot.sendMessage(chatId, `Nice to meet you ${text}, you are from ${country}.`);
+      await bot.sendMessage(chatId, `Nice to meet you ${name}, you are from ${country}.`);
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
