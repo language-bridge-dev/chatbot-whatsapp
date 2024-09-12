@@ -125,11 +125,11 @@ export async function POST(req) {
             });
         }
         else if (user.firstScreenId && ! user.secondScreenId){
-            secondScreenId = photoId;
+            user.secondScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded second photo with size ${photoSize}, please upload the third screenshot`);
         }
         else if(user.firstScreenId && user.secondScreenId && ! user.thirdScreenId){
-            thirdScreenId = photoId;
+            user.thirdScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded third photo with size ${photoSize}`);
             await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:
                 \n-	You must use a computer. 
@@ -149,7 +149,7 @@ export async function POST(req) {
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
-    
+
   } catch (error) {
     console.error('Error handling Telegram webhook:', error);
   
