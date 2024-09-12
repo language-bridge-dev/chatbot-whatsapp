@@ -3,11 +3,21 @@ import TelegramBot from 'node-telegram-bot-api';
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { webHook: true });
 
+const userSessions = {};
+
+function getUserSession(chatId) {
+  if (!userSessions[chatId]) {
+    userSessions[chatId] = {
+      firstScreenId: null,
+      secondScreenId: null,
+      thirdScreenId: null,
+    };
+  }
+  return userSessions[chatId];
+}
+
 let applicantName = 'Luis';
 let techName = 'Romany';
-let firstScreenId;
-let secondScreenId;
-let thirdScreenId;
 
 export async function POST(req) {
   try {
@@ -15,6 +25,7 @@ export async function POST(req) {
     console.log('body',body);
 
     const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
+    let user = getUserSession(chatId);
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
     let file = body.message?.document?.file_name;
@@ -100,8 +111,8 @@ export async function POST(req) {
         const photoId = screenshot.file_id;
         const photoSize = screenshot.file_size;
         const photo = await bot.getFile(photoId);
-        if (!firstScreenId){
-            firstScreenId = photoId;
+        if (! user.firstScreenId){
+            user.firstScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded first photo with size ${photoSize}`);
             console.log(photo);
 
@@ -113,11 +124,11 @@ export async function POST(req) {
                 },
             });
         }
-        else if (firstScreenId && ! secondScreenId){
+        else if (user.firstScreenId && ! user.secondScreenId){
             secondScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded second photo with size ${photoSize}, please upload the third screenshot`);
         }
-        else if(firstScreenId && secondScreenId && ! thirdScreenId){
+        else if(user.firstScreenId && user.secondScreenId && ! user.thirdScreenId){
             thirdScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded third photo with size ${photoSize}`);
             await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:
@@ -126,18 +137,24 @@ export async function POST(req) {
                 \n-	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
                 \nThat’s it for now. Thanks for your time`);
         }
-        else if (firstScreenId && secondScreenId && thirdScreenId){
+        else if (user.firstScreenId && user.secondScreenId && user.thirdScreenId){
             await bot.sendMessage(chatId,`you already uploaded the 3 screenshots for the 3 test calls`);
         }
+
+        userSessions[chatId] = user
     }
 
     if (callbackData === 'yes_voice_clear'){
         await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error('Error handling Telegram webhook:', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  
+    if (error instanceof SomeSpecificError) {
+      return new Response(JSON.stringify({ error: 'Specific error message' }), { status: 400 });
+    }
+  
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
   }
 }
