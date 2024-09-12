@@ -14,6 +14,8 @@ export async function POST(req) {
     const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
+    const screenshot = body.message?.document?.file_name;
+    const photo = body.message?.photo[body.message.photo?.length-1]
 
     if (!chatId) {
         throw new Error('chatId is missing');
@@ -80,7 +82,16 @@ export async function POST(req) {
         });
     }
     else if (callbackData === 'yes_see_calls' ||  callbackData === 'done_see_calls'){
-        await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call and send the screenshot here please.`);
+        await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call./n📎 Upload screenshot photo to continue.`);
+    }
+
+    if (screenshot){
+        await bot.sendMessage(chatId,`Please, upload your selfie as a photo!/nDo not upload it as a file.`)
+    }
+
+    if (photo){
+        console.log('photo'+photo);
+        console.log('photos'+body.message.photo);
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
