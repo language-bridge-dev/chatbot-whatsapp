@@ -5,8 +5,8 @@ const bot = new TelegramBot(token, { webHook: true });
 
 export async function POST(req) {
   try {
+    let name='';
     const body = await req.json();
-    let name;
     if (body.message) {
       const chatId = body.message.chat?.id;
       const text = body.message.text;
@@ -18,8 +18,10 @@ export async function POST(req) {
       if (text === '/start') {
         await bot.sendMessage(chatId, "Hello, I'm a bot, please write your name.");
       } else {
-        name=text;
-        await bot.sendMessage(chatId, `Hello ${text}, please select your country:`, {
+        console.log(name);
+        name = text;
+        console.log(name);
+        await bot.sendMessage(chatId, `Hello ${name}, please select your country:`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'US', callback_data: 'US' }],
@@ -31,8 +33,8 @@ export async function POST(req) {
         });
       }
     }
-
     if (body.callback_query) {
+      console.log(name);
       const callbackQuery = body.callback_query;
       const country = callbackQuery.data;
       const chatId = callbackQuery.message?.chat?.id;
