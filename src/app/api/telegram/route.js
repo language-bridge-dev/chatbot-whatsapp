@@ -5,6 +5,9 @@ const bot = new TelegramBot(token, { webHook: true });
 
 let applicantName = 'Luis';
 let techName = 'Romany';
+let firstScreenId;
+let secondScreenId;
+let thirdScreenId;
 
 export async function POST(req) {
   try {
@@ -17,7 +20,7 @@ export async function POST(req) {
     let file = body.message?.document?.file_name;
     let screenshot;
     if (body.message && body.message.photo){
-        screenshot = body.message.photo[body.message.photo.length - 1];
+        screenshot = body.message.photo[0];
     }
 
     if (!chatId) {
@@ -90,11 +93,47 @@ export async function POST(req) {
     }
 
     if (file){
-        await bot.sendMessage(chatId,`Please, upload your selfie as a photo!\nDo not upload it as a file.`)
+        await bot.sendMessage(chatId,`Please, upload screenshot as a photo!\nDo not upload it as a file.`)
     }
 
     if (screenshot){
-        console.log('photo'+screenshot);
+        const photoId = screenshot.file_id;
+        const photoSize = screenshot.file_size;
+        const photo = await bot.getFile(photoId);
+        if (!firstScreenId){
+            firstScreenId = photoId;
+            await bot.sendMessage(chatId,`you uploaded first photo with size ${photoSize}`);
+            console.log(photo);
+
+            await bot.sendMessage(chatId, `Perfect, thanks for that screenshot. Have you hung up already? Was the audio clear?`, {
+                reply_markup: {
+                    inline_keyboard: [
+                    [{ text: 'Yes I did hung up and the audio was clear', callback_data: 'yes_voice_clear' }],
+                    [{ text: 'No I did not hung up and the audio was not clear', callback_data: 'no_voice_clear' }],
+                    ],
+                },
+            });
+        }
+        else if (firstScreenId && ! secondScreenId){
+            secondScreenId = photoId;
+            await bot.sendMessage(chatId,`you uploaded second photo with size ${photoSize}, please upload the third screenshot`);
+        }
+        else if(firstScreenId && secondScreenId && ! thirdScreenId){
+            thirdScreenId = photoId;
+            await bot.sendMessage(chatId,`you uploaded third photo with size ${photoSize}`);
+            await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:
+                \n-	You must use a computer. 
+                \n-	You have to call the number 14049203888 and then enter the access code that has been provided via email.
+                \n-	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
+                \nThat’s it for now. Thanks for your time`);
+        }
+        else if (firstScreenId && secondScreenId && thirdScreenId){
+            await bot.sendMessage(chatId,`you already uploaded the 3 screenshots for the 3 test calls`);
+        }
+    }
+
+    if (callbackData === 'yes_voice_clear'){
+        await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
