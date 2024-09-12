@@ -12,7 +12,11 @@ export async function POST(req) {
     if (body.message) {
       const chatId = body.message.chat?.id;
       const text = body.message.text;
-      const callback = body.callback_query;
+      let callbackQuery;
+      
+      if(body.callback_query){
+        callbackQuery = body.callback_query;
+      };
 
       if (!chatId) {
         throw new Error('chatId is missing');
