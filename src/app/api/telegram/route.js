@@ -148,6 +148,8 @@ export async function POST(req) {
         await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
     }
 
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    
   } catch (error) {
     console.error('Error handling Telegram webhook:', error);
   
