@@ -12,11 +12,6 @@ export async function POST(req) {
     if (body.message) {
       const chatId = body.message.chat?.id;
       const text = body.message.text;
-      let callbackQuery;
-      
-      if(body.callback_query){
-        callbackQuery = body.callback_query;
-      };
 
       if (!chatId) {
         throw new Error('chatId is missing');
@@ -36,8 +31,8 @@ export async function POST(req) {
       }
     }
 
-    if (callbackQuery) {
-        if (callbackQuery.data === 'no_read_email'){
+    if (body.callback_query) {
+        if (body.callback_query.data === 'no_read_email'){
             await bot.sendMessage(chatId, `Please read it and when you finish press 'DONE'`,{
                 reply_markup: {
                     inline_keyboard: [
@@ -46,7 +41,7 @@ export async function POST(req) {
                 },
             });
         }
-        else if (callbackQuery.data === 'yes_read_email' || callbackQuery.data === 'done_read_email'){
+        else if (body.callback_query.data === 'yes_read_email' || body.callback_query.data === 'done_read_email'){
             await bot.sendMessage(chatId, `Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?`, {
                 reply_markup: {
                     inline_keyboard: [
@@ -58,8 +53,8 @@ export async function POST(req) {
         }
     }
 
-    if (callbackQuery) {
-        if (callbackQuery.data === 'no_logged'){
+    if (body.callback_query) {
+        if (body.callback_query.data === 'no_logged'){
             await bot.sendMessage(chatId, `Please contact with the HR, And when you log in successfully please press 'DONE'`,{
                 reply_markup: {
                     inline_keyboard: [
@@ -68,7 +63,7 @@ export async function POST(req) {
                 },
             });
         }
-        else if (callbackQuery.data === 'yes_logged' ||  callbackQuery.data === 'done_logged'){
+        else if (body.callback_query.data === 'yes_logged' ||  body.callback_query.data === 'done_logged'){
             await bot.sendMessage(chatId, `Now, access to the Scheduled Calls button in our call center. You will see some calls have been scheduled for you. Three of them are labelled as TEST CALL and the other three are labelled as ALTA`, {
                 reply_markup: {
                     inline_keyboard: [
@@ -80,8 +75,8 @@ export async function POST(req) {
         }
     }
 
-    if (callbackQuery) {
-        if (callbackQuery.data === 'no_see_calls'){
+    if (body.callback_query) {
+        if (body.callback_query.data === 'no_see_calls'){
             await bot.sendMessage(chatId, `Please contact with the HR, And when you see the calls successfully please press 'DONE'`,{
                 reply_markup: {
                     inline_keyboard: [
@@ -90,16 +85,18 @@ export async function POST(req) {
                 },
             });
         }
-        else if (callbackQuery.data === 'yes_see_calls' ||  callbackQuery.data === 'done_see_calls'){
+        else if (body.callback_query.data === 'yes_see_calls' ||  body.callback_query.data === 'done_see_calls'){
             await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call and send the screenshot here please.`);
         }
     }
 
-    if (callbackQuery) {
+    if (body.callback_query) {
+      const callbackQuery = body.callback_query;
       const country = callbackQuery.data;
       const chatId = callbackQuery.message?.chat?.id;
       console.log("message"+callbackQuery.message);
       console.log("data"+callbackQuery.data);
+      
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
