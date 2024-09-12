@@ -18,7 +18,7 @@ function getUserSession(chatId) {
   return userSessions[chatId];
 }
 
-setInterval(function() {
+function checkUsers(){
     console.log('check now');
     if(userSessions){
         Object.keys(userSessions).forEach(function(chatId, user) {
@@ -34,7 +34,9 @@ setInterval(function() {
     } else {
         console.log('no users found');
     }
-},60000)
+}
+
+setInterval(checkUsers,30000);
 
 function setLastSendTime(chatId) {
     console.log('user just sent something', userSessions[chatId]);
@@ -54,6 +56,10 @@ export async function POST(req) {
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
     let file = body.message?.document?.file_name;
+    if (file){
+        await bot.sendMessage(chatId,`Please, upload screenshot as a photo!\nDo not upload it as a file.`)
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
+    }
     let screenshot;
     if (body.message && body.message.photo){
         screenshot = body.message.photo[0];
@@ -131,9 +137,7 @@ export async function POST(req) {
         await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.`);
     }
 
-    if (file){
-        await bot.sendMessage(chatId,`Please, upload screenshot as a photo!\nDo not upload it as a file.`)
-    }
+
 
     if (screenshot){
         const photoId = screenshot.file_id;
