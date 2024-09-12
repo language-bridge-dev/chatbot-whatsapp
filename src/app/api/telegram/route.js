@@ -11,9 +11,15 @@ function getUserSession(chatId) {
       firstScreenId: null,
       secondScreenId: null,
       thirdScreenId: null,
+      done:false,
+      lastSendTime:null
     };
   }
   return userSessions[chatId];
+}
+
+function setLastSendTime(chatId) {
+    userSessions[chatId].lastSendTime = Date.now();
 }
 
 let applicantName = 'Luis';
@@ -38,6 +44,7 @@ export async function POST(req) {
         throw new Error('chatId is missing');
     }
 
+    setLastSendTime(chatId);
 
     if (text === '/start') {
         await bot.sendMessage(chatId, `Hello ${applicantName}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
@@ -48,6 +55,8 @@ export async function POST(req) {
                 ],
             },
         });
+    } else {
+        await bot.sendMessage(chatId,'Please select from the menu or /start to start over(if you already provide a screenshots it will not change or delete).')
     }
 
     if (callbackData === 'no_read_email'){
@@ -110,12 +119,10 @@ export async function POST(req) {
     if (screenshot){
         const photoId = screenshot.file_id;
         const photoSize = screenshot.file_size;
-        const photo = await bot.getFile(photoId);
+        // const photo = await bot.getFile(photoId);
         if (! user.firstScreenId){
             user.firstScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded first photo with size ${photoSize}`);
-            console.log(photo);
-
             await bot.sendMessage(chatId, `Perfect, thanks for that screenshot. Have you hung up already? Was the audio clear?`, {
                 reply_markup: {
                     inline_keyboard: [
@@ -136,6 +143,7 @@ export async function POST(req) {
                 \n-	You have to call the number 14049203888 and then enter the access code that has been provided via email.
                 \n-	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
                 \nThat’s it for now. Thanks for your time`);
+                user.done = true
         }
         else if (user.firstScreenId && user.secondScreenId && user.thirdScreenId){
             await bot.sendMessage(chatId,`you already uploaded the 3 screenshots for the 3 test calls`);
@@ -160,3 +168,18 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
   }
 }
+
+setInterval(()=>{
+    if(userSessions){
+        Object.keys(userSessions).forEach(function(chatId, user) {
+            if(user.done){
+                return
+            }
+            const now = Date.now();
+            if (((now-user.lastSendTime)/60000) < 2){
+                return
+            }
+            bot.sendMessage(chatId,`Hello ${applicantName}, please, remember that you must complete this verification before your exam. Otherwise, this can be postponed or suspended. I would like to retake the verification in the last step concluded.`);
+        });
+    }
+},60000)
