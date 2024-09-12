@@ -15,10 +15,16 @@ export async function POST(req) {
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
     const screenshot = body.message?.document?.file_name;
-    const photo = body.message?.photo[body.message.photo?.length-1]
+    let photo;
 
     if (!chatId) {
         throw new Error('chatId is missing');
+    }
+
+    if (body.message){
+        if (body.message.photo){
+            photo = body.message.photo;
+        }
     }
 
     if (text === '/start') {
