@@ -18,27 +18,33 @@ function getUserSession(chatId) {
   return userSessions[chatId];
 }
 
-function checkUsers(){
-    console.log('check now');
-    if(userSessions){
-        Object.keys(userSessions).forEach(function(chatId, user) {
-            if(user.done){
-                return
-            }
-            const now = Date.now();
-            if (((now-user.lastSendTime)/60000) < 2){
-                return
-            }
-            bot.sendMessage(chatId,`Hello ${applicantName}, please, remember that you must complete this verification before your exam. Otherwise, this can be postponed or suspended. I would like to retake the verification in the last step concluded.`);
-        });
-    }
+function reminder() {
+    const now = Date.now();
+    console.log('Checking for reminders...');
+    
+    Object.keys(userSessions).forEach((chatId) => {
+      const session = userSessions[chatId];
+  
+      if (session.done) {
+        return; // Skip if user has completed the process
+      }
+  
+      const minutesSinceLastMessage = (now - session.lastSendTime) / 60000;
+  
+      if (minutesSinceLastMessage >= 2) {
+        bot.sendMessage(chatId, `Hello ${applicantName}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
+        setLastSendTime(chatId); // Reset reminder timer after sending
+      }
+    });
 }
 
-setInterval(checkUsers,30000);
+setInterval(reminder, 30000);
 
 function setLastSendTime(chatId) {
-    console.log('user just sent something', chatId);
-    userSessions[chatId].lastSendTime = Date.now();
+    const session = getUserSession(chatId);
+    session.lastSendTime = Date.now();
+    userSessions[chatId] = session;
+    console.log('Updated session:', userSessions[chatId]);
 }
 
 let applicantName = 'Luis';
@@ -46,15 +52,21 @@ let techName = 'Romany';
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    console.log('body',body);
 
+
+    const body = await req.json();
     const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
-    getUserSession(chatId);
-    setLastSendTime(chatId);
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
-    let file = body.message?.document?.file_name;
+    const file = body.message?.document?.file_name;
+
+    if (!chatId) throw new Error('chatId is missing');
+
+    getUserSession(chatId);
+    setLastSendTime(chatId);
+
+    console.log('body',body);
+
     if (file){
         await bot.sendMessage(chatId,`Please, upload screenshot as a photo!\nDo not upload it as a file.`)
         return new Response(JSON.stringify({ success: true }), { status: 200 });
@@ -63,11 +75,6 @@ export async function POST(req) {
     if (body.message && body.message.photo){
         screenshot = body.message.photo[0];
     }
-
-    if (!chatId) {
-        throw new Error('chatId is missing');
-    }
-
 
     if (text === '/start') {
         await bot.sendMessage(chatId, `Hello ${applicantName}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
@@ -78,8 +85,6 @@ export async function POST(req) {
                 ],
             },
         });
-    } else if (text && text !== '/start') {
-        await bot.sendMessage(chatId,'Please select from the menu or /start to start over(if you already provide a screenshots it will not change or delete).')
     }
 
     if (callbackData === 'no_read_email'){
