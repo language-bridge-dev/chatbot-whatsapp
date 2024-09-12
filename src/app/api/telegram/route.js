@@ -108,8 +108,7 @@ export async function POST(req) {
             await bot.sendMessage(chatId, `Perfect, thanks for that screenshot. Have you hung up already? Was the audio clear?`, {
                 reply_markup: {
                     inline_keyboard: [
-                    [{ text: 'Yes I did hung up and the audio was clear', callback_data: 'yes_voice_clear' }],
-                    [{ text: 'No I did not hung up and the audio was not clear', callback_data: 'no_voice_clear' }],
+                    [{ text: 'Yes I did hung up (please hung up if you did not) and the audio was clear', callback_data: 'yes_voice_clear' }],
                     ],
                 },
             });
