@@ -40,7 +40,7 @@ export async function POST(req) {
         throw new Error('chatId is missing in callback_query');
       }
 
-      await bot.sendMessage(chatId, `Nice to meet you, you are from ${country}.`);
+      await bot.sendMessage(chatId, `Nice to meet you ${text}, you are from ${country}.`);
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
