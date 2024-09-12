@@ -47,7 +47,7 @@
 
 import TelegramBot from 'node-telegram-bot-api';
 
-const token = TELEGRAM_BOT_TOKEN;
+const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token);
 
 bot.setWebHook(`https://chatbot-whatsapp-omega.vercel.app/api/telegram`);
