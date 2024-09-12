@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api';
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { webHook: true });
 
-const userSessions = {};
+let userSessions = {};
 
 function getUserSession(chatId) {
   if (!userSessions[chatId]) {
@@ -12,7 +12,7 @@ function getUserSession(chatId) {
       secondScreenId: null,
       thirdScreenId: null,
       done:false,
-      lastSendTime:null
+      lastSendTime:Date.now()
     };
   }
   return userSessions[chatId];
@@ -31,15 +31,13 @@ function checkUsers(){
             }
             bot.sendMessage(chatId,`Hello ${applicantName}, please, remember that you must complete this verification before your exam. Otherwise, this can be postponed or suspended. I would like to retake the verification in the last step concluded.`);
         });
-    } else {
-        console.log('no users found');
     }
 }
 
 setInterval(checkUsers,30000);
 
 function setLastSendTime(chatId) {
-    console.log('user just sent something', userSessions[chatId]);
+    console.log('user just sent something', chatId);
     userSessions[chatId].lastSendTime = Date.now();
 }
 
@@ -52,7 +50,8 @@ export async function POST(req) {
     console.log('body',body);
 
     const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
-    let user = getUserSession(chatId);
+    getUserSession(chatId);
+    setLastSendTime(chatId);
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
     let file = body.message?.document?.file_name;
@@ -69,7 +68,6 @@ export async function POST(req) {
         throw new Error('chatId is missing');
     }
 
-    setLastSendTime(chatId);
 
     if (text === '/start') {
         await bot.sendMessage(chatId, `Hello ${applicantName}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
@@ -143,8 +141,8 @@ export async function POST(req) {
         const photoId = screenshot.file_id;
         const photoSize = screenshot.file_size;
         // const photo = await bot.getFile(photoId);
-        if (! user.firstScreenId){
-            user.firstScreenId = photoId;
+        if (! getUserSession(chatId).firstScreenId){
+            userSessions[chatId].firstScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded first photo with size ${photoSize}`);
             await bot.sendMessage(chatId, `Perfect, thanks for that screenshot. Have you hung up already? Was the audio clear?`, {
                 reply_markup: {
@@ -154,25 +152,23 @@ export async function POST(req) {
                 },
             });
         }
-        else if (user.firstScreenId && ! user.secondScreenId){
-            user.secondScreenId = photoId;
+        else if (getUserSession(chatId).firstScreenId && ! getUserSession(chatId).secondScreenId){
+            userSessions[chatId].secondScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded second photo with size ${photoSize}, please upload the third screenshot`);
         }
-        else if(user.firstScreenId && user.secondScreenId && ! user.thirdScreenId){
-            user.thirdScreenId = photoId;
+        else if(getUserSession(chatId).firstScreenId && getUserSession(chatId).secondScreenId && ! getUserSession(chatId).thirdScreenId){
+            userSessions[chatId].thirdScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded third photo with size ${photoSize}`);
             await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:
                 \n-	You must use a computer. 
                 \n-	You have to call the number 14049203888 and then enter the access code that has been provided via email.
                 \n-	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
                 \nThat’s it for now. Thanks for your time`);
-                user.done = true
+                userSessions[chatId].done = true
         }
-        else if (user.firstScreenId && user.secondScreenId && user.thirdScreenId){
+        else if (getUserSession(chatId).firstScreenId && getUserSession(chatId).secondScreenId && getUserSession(chatId).thirdScreenId){
             await bot.sendMessage(chatId,`you already uploaded the 3 screenshots for the 3 test calls`);
         }
-
-        userSessions[chatId] = user
     }
 
     if (callbackData === 'yes_voice_clear'){
