@@ -11,8 +11,8 @@ function getUserSession(chatId) {
       firstScreenId: null,
       secondScreenId: null,
       thirdScreenId: null,
-      done:false,
       waiting:false,
+      done:false,
       lastSendTime:Date.now()
     };
   }
@@ -31,6 +31,7 @@ function reminder() {
       const minutesSinceLastMessage = (now - session.lastSendTime) / 60000;
   
       if (minutesSinceLastMessage >= 2 && minutesSinceLastMessage <= 10) {
+        console.log('sending a reminder');
         bot.sendMessage(chatId, `Hello ${applicantName}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
       }
     });
@@ -39,9 +40,7 @@ function reminder() {
 setInterval(reminder, 30000);
 
 function setLastSendTime(chatId) {
-    const session = getUserSession(chatId);
-    session.lastSendTime = Date.now();
-    userSessions[chatId] = session;
+    userSessions[chatId].lastSendTime = Date.now();
     console.log('Updated session:', userSessions[chatId]);
 }
 
@@ -50,8 +49,6 @@ let techName = 'Romany';
 
 export async function POST(req) {
   try {
-
-
     const body = await req.json();
     const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
     const text = body.message?.text;
@@ -59,20 +56,35 @@ export async function POST(req) {
     const file = body.message?.document?.file_name;
 
     if (!chatId) throw new Error('chatId is missing');
-    if (userSessions[chatId].waiting){
+
+    let user = getUserSession(chatId);
+
+    if (user.waiting){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
-    getUserSession(chatId);
+    if(user.done){
+        await bot.sendMessage(chatId,`You are already ready to take your ALTA evaluation. I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
+            -	You must use a computer. 
+            -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
+            -	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
+            \nThat’s it for now. Thanks for your time`);
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
+    }
+
     setLastSendTime(chatId);
 
     console.log('body',body);
+    console.log('users',userSessions);
 
     if (file){
         await bot.sendMessage(chatId,`Please, upload screenshot as a photo!\nDo not upload it as a file.`)
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
+
     let screenshot;
+    
     if (body.message && body.message.photo){
         screenshot = body.message.photo[0];
     }
