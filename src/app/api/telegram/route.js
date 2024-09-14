@@ -70,11 +70,11 @@ export async function POST(req) {
         console.log('support is here');
         bot.sendMessage(romanySupID,'Thank you, I will notify the applicant.');
         let [chatId,solver] = callbackData.split(',');
-        let user = getUserSession[chatId];
+        let user = getUserSession(chatId);
         await bot.sendMessage(chatId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
             reply_markup:{
                 inline_keyboard:[
-                    [{text:'CONTINUE',callback_data:solver}]
+                    [{text:'CONTINUE',callback_data:solver}],
                 ]
             }
         });
