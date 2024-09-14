@@ -68,7 +68,7 @@ export async function POST(req) {
 
     if (!chatId) throw new Error('chatId is missing');
 
-    if (chatId == romanySupID){
+    if (chatId == luisSupId){
         console.log('support is here');
         let [userId,solver] = callbackData.split(',');
         userSessions[userId].waiting = false;
@@ -88,6 +88,7 @@ export async function POST(req) {
 
     if (user.waiting){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
     if(user.done){
@@ -160,15 +161,6 @@ export async function POST(req) {
         userSessions[chatId].logged = true
     }
 
-    // if (callbackData === 'no_see_calls'){
-    //     await bot.sendMessage(chatId, `Please contact with the HR, And when you see the calls successfully please press 'DONE'`,{
-    //         reply_markup: {
-    //             inline_keyboard: [
-    //             [{ text: 'DONE', callback_data: 'done_see_calls' }],
-    //             ],
-    //         },
-    //     });
-    // }
     if (callbackData === 'yes_see_calls'){
         await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.`);
         userSessions[chatId].seeCalls = true
