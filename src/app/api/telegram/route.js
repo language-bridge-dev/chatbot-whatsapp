@@ -66,24 +66,25 @@ export async function POST(req) {
 
     if (!chatId) throw new Error('chatId is missing');
 
-    if (chatId === romanySupID){
-        let [userId,solver] = callbackData.split(',');
-        let user = getUserSession[userId];
-        await bot.sendMessage(romanySupID,'Thank you, I will notify the applicant.');
-        await bot.sendMessage(userId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
+    if (chatId === romanySupID && callbackData){
+        console.log('support is here');
+        bot.sendMessage(romanySupID,'Thank you, I will notify the applicant.');
+        let [chatId,solver] = callbackData.split(',');
+        let user = getUserSession[chatId];
+        await bot.sendMessage(chatId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
             reply_markup:{
                 inline_keyboard:[
                     [{text:'CONTINUE',callback_data:solver}]
                 ]
             }
         });
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
     let user = getUserSession(chatId,name);
 
     if (user.waiting){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
-        return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
     if(user.done){
@@ -131,6 +132,7 @@ export async function POST(req) {
             },
         });
     }
+
     if (callbackData === 'yes_read_email'){
         await bot.sendMessage(chatId, `Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?`, {
             reply_markup: {
@@ -143,15 +145,6 @@ export async function POST(req) {
         userSessions[chatId].readEmail = true;
     }
 
-    // if (callbackData === 'no_logged'){
-    //     await bot.sendMessage(chatId, `Please contact with the HR, And when you log in successfully please press 'DONE'`,{
-    //         reply_markup: {
-    //             inline_keyboard: [
-    //             [{ text: 'DONE', callback_data: 'done_logged' }],
-    //             ],
-    //         },
-    //     });
-    // }
     if (callbackData === 'yes_logged'){
         await bot.sendMessage(chatId, `Now, access to the Scheduled Calls button in our call center. You will see some calls have been scheduled for you. Three of them are labelled as TEST CALL and the other three are labelled as ALTA`, {
             reply_markup: {
@@ -275,15 +268,14 @@ export async function POST(req) {
     if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls' || callbackData === 'no_voice_clear_finish'){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
         userSessions[chatId].waiting = true
-        const userName = body.message?.from.username || body.callback_query?.from.username;
-        let solver = callbackData.replace('no','yes')
-        await bot.sendMessage(romanySupID,`Applicant @${userName} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
+        let solver = callbackData.replace('no','yes');
+        await bot.sendMessage(romanySupID,`Applicant @${user.name} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
             reply_markup:{
                 inline_keyboard:[
                     [{text:'SOLVED',callback_data:`${chatId},${solver}`}]
                 ]
             }
-        })
+        });
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
@@ -298,4 +290,3 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
   }
 }
-
