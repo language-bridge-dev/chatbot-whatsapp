@@ -11,6 +11,8 @@ let techName = 'Romany';
 
 function getUserSession(chatId,applicantName) {
   if (!userSessions[chatId]) {
+    console.log('found user');
+    
     userSessions[chatId] = {
       name:applicantName,
       readEmail:false,
@@ -70,14 +72,15 @@ export async function POST(req) {
         console.log('support is here');
         let [userId,solver] = callbackData.split(',');
         userSessions[userId].waiting = false;
-        bot.sendMessage(userId,`the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
+        console.log('user not waiting');
+        await bot.sendMessage(userId,`the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
             reply_markup:{
                 inline_keyboard:[
                     [{text:'CONTINUE',callback_data:solver}],
                 ]
             }
         });
-        bot.sendMessage(chatId,'Thank you, I notified the applicant.');
+        await bot.sendMessage(chatId,'Thank you, I notified the applicant.');
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
@@ -272,7 +275,7 @@ export async function POST(req) {
         await bot.sendMessage(romanySupID,`Applicant @${user.name} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
             reply_markup:{
                 inline_keyboard:[
-                    [{text:'SOLVED',callback_data:`${chatId},${solver}`}]
+                    [{text:'SOLVED',callback_data:`${chatId},${solver}`}],
                 ]
             }
         });
