@@ -66,18 +66,19 @@ export async function POST(req) {
 
     if (!chatId) throw new Error('chatId is missing');
 
-    if (chatId === romanySupID && callbackData){
+    if (callbackData.includes(',')){
         console.log('support is here');
-        bot.sendMessage(romanySupID,'Thank you, I will notify the applicant.');
-        let [chatId,solver] = callbackData.split(',');
-        let user = getUserSession(chatId);
-        await bot.sendMessage(chatId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
+        let [userId,solver] = callbackData.split(',');
+        let user = getUserSession(userId);
+        await bot.sendMessage(userId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
             reply_markup:{
                 inline_keyboard:[
                     [{text:'CONTINUE',callback_data:solver}],
                 ]
             }
         });
+        userSessions[userId].waiting = false;
+        bot.sendMessage(romanySupID,'Thank you, I notified the applicant.');
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
