@@ -42,7 +42,7 @@ function reminder() {
 
       if (minutesSinceLastMessage >= 2 && minutesSinceLastMessage <= 10) {
         console.log('sending a reminder');
-        bot.sendMessage(chatId, `Hello ${applicantName}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
+        bot.sendMessage(chatId, `Hello ${session.name}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
       }
     });
 }
@@ -67,9 +67,9 @@ export async function POST(req) {
     if (!chatId) throw new Error('chatId is missing');
 
     if (chatId === romanySupID){
-        let [userId,_problem,solver] = callbackData.split(',');
+        let [userId,solver] = callbackData.split(',');
         let user = getUserSession[userId];
-        await bot.sendMessage(chatId,'Thank you, I will notify the applicant.');
+        await bot.sendMessage(romanySupID,'Thank you, I will notify the applicant.');
         await bot.sendMessage(userId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
             reply_markup:{
                 inline_keyboard:[
@@ -77,7 +77,6 @@ export async function POST(req) {
                 ]
             }
         });
-        return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
     let user = getUserSession(chatId,name);
@@ -113,7 +112,7 @@ export async function POST(req) {
     }
 
     if (text === '/start') {
-        await bot.sendMessage(chatId, `Hello ${user.applicantName}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
+        await bot.sendMessage(chatId, `Hello ${user.name}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
             reply_markup: {
                 inline_keyboard: [
                 [{ text: 'Yes I read it', callback_data: 'yes_read_email' }],
@@ -281,7 +280,7 @@ export async function POST(req) {
         await bot.sendMessage(romanySupID,`Applicant @${userName} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
             reply_markup:{
                 inline_keyboard:[
-                    [{text:'SOLVED',callback_data:`${chatId},${callbackData},${solver}`}]
+                    [{text:'SOLVED',callback_data:`${chatId},${solver}`}]
                 ]
             }
         })
