@@ -106,12 +106,12 @@ export async function POST(req) {
         await bot.sendMessage(chatId, `Please read it and when you finish press 'DONE'`,{
             reply_markup: {
                 inline_keyboard: [
-                [{ text: 'DONE', callback_data: 'done_read_email' }],
+                [{ text: 'DONE', callback_data: 'yes_read_email' }],
                 ],
             },
         });
     }
-    if (callbackData === 'yes_read_email' || callbackData === 'done_read_email'){
+    if (callbackData === 'yes_read_email'){
         await bot.sendMessage(chatId, `Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?`, {
             reply_markup: {
                 inline_keyboard: [
@@ -131,7 +131,7 @@ export async function POST(req) {
     //         },
     //     });
     // }
-    if (callbackData === 'yes_logged' ||  callbackData === 'done_logged'){
+    if (callbackData === 'yes_logged'){
         await bot.sendMessage(chatId, `Now, access to the Scheduled Calls button in our call center. You will see some calls have been scheduled for you. Three of them are labelled as TEST CALL and the other three are labelled as ALTA`, {
             reply_markup: {
                 inline_keyboard: [
@@ -151,7 +151,7 @@ export async function POST(req) {
     //         },
     //     });
     // }
-    if (callbackData === 'yes_see_calls' ||  callbackData === 'done_see_calls'){
+    if (callbackData === 'yes_see_calls'){
         await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.`);
     }
 
@@ -166,7 +166,7 @@ export async function POST(req) {
                 reply_markup: {
                     inline_keyboard: [
                     [{ text: 'Yes I did hung up', callback_data: 'yes_hung_up' }],
-                    [{ text: 'Yes I did hung up BUT the audio was not clear', callback_data: 'no_hung_up' }],
+                    [{ text: 'No I did not hung up', callback_data: 'no_hung_up' }],
                     ],
                 },
             });
@@ -178,13 +178,11 @@ export async function POST(req) {
         else if(user.firstScreenId && user.secondScreenId && ! user.thirdScreenId){
             userSessions[chatId].thirdScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded third photo with size ${photoSize}`);
-            await bot.sendMessage(chatId, `Perfect, thanks for the screenshots. Have you hung up already? Was the audio clear for both numbers?`, {
+            await bot.sendMessage(chatId, `Perfect, thanks for the screenshots. Have you hung up already for both calls?`, {
                 reply_markup: {
                     inline_keyboard: [
-                    [{ text: 'Yes I did hung up and the audio was clear for both numbers', callback_data: 'yes_voice_clear_second' }],
-                    [{ text: 'Yes I did hung up BUT the audio was not clear for both or one of them', callback_data: 'no_voice_clear' }],
-                    [{ text: 'No I did not hung up and the audio was clear for both', callback_data: 'no_voice_clear' }],
-                    [{ text: 'No I did not hung up and the audio was not clear for both or one of them', callback_data: 'no_voice_clear' }],
+                    [{ text: 'Yes I did hung up', callback_data: 'yes_hung_up_finish' }],
+                    [{ text: 'No I did hung up', callback_data: 'no_hung_up_finish' }],
                     ],
                 },
             });
@@ -194,7 +192,7 @@ export async function POST(req) {
         }
     }
 
-    if (callbackData === 'yes_hung_up' || callbackData === 'done_hung_up'){
+    if (callbackData === 'yes_hung_up'){
         await bot.sendMessage(chatId,'Great!\nWas the audio clear?',{
             reply_markup:{
                 inline_keyboard:[
@@ -205,11 +203,32 @@ export async function POST(req) {
         })
     }
 
+    if (callbackData === 'yes_hung_up_finish'){
+        await bot.sendMessage(chatId,'Great!\nWas the audio clear for both calls?',{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'Yes it was clear',callback_data:'yes_voice_clear_finish'}],
+                    [{text:'No it was not clear',callback_data:'no_voice_clear_finish'}]
+                ]
+            }
+        })
+    }
+
     if (callbackData === 'no_hung_up'){
         await bot.sendMessage(chatId,'Please hung up!\nClick "DONE" when you hung up',{
             reply_markup:{
                 inline_keyboard:[
-                    [{text:'Yes it was clear',callback_data:'done_hung_up'}],
+                    [{text:'DONE',callback_data:'yes_hung_up'}],
+                ]
+            }
+        })
+    }
+
+    if (callbackData === 'no_hung_up_finish'){
+        await bot.sendMessage(chatId,'Please hung up!\nClick "DONE" when you hung up',{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'DONE',callback_data:'yes_hung_up_finish'}],
                 ]
             }
         })
@@ -219,7 +238,7 @@ export async function POST(req) {
         await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
     }
 
-    if (callbackData === 'yes_voice_clear_second'){
+    if (callbackData === 'yes_voice_clear_finish'){
         await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
             -	You must use a computer. 
             -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
@@ -228,11 +247,11 @@ export async function POST(req) {
             userSessions[chatId].done = true
     }
 
-    if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls'){
+    if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls' || callbackData === 'no_voice_clear_finish'){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
         userSessions[chatId].waiting = true
         const userName = body.message?.from.username || body.callback_query?.from.username
-        await bot.sendMessage(romanySupID,`Applicant @${userName} has a problem during the verification (${callbackData}).`)
+        await bot.sendMessage(itSupportId,`Applicant @${userName} has a problem during the verification (${callbackData}).`)
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
