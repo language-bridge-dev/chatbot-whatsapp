@@ -70,14 +70,14 @@ export async function POST(req) {
         console.log('support is here');
         let [userId,solver] = callbackData.split(',');
         userSessions[userId].waiting = false;
-        // await bot.sendMessage(userId,`the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
-        //     reply_markup:{
-        //         inline_keyboard:[
-        //             [{text:'CONTINUE',callback_data:solver}],
-        //         ]
-        //     }
-        // });
-        bot.sendMessage(romanySupID,'Thank you, I notified the applicant.');
+        bot.sendMessage(userId,`the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'CONTINUE',callback_data:solver}],
+                ]
+            }
+        });
+        bot.sendMessage(chatId,'Thank you, I notified the applicant.');
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
