@@ -4,6 +4,8 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { webHook: true });
 
 let userSessions = {};
+const itSupportId = '826345981';
+const romanySupID = '1337765689';
 
 function getUserSession(chatId) {
   if (!userSessions[chatId]) {
@@ -20,16 +22,16 @@ function getUserSession(chatId) {
 }
 
 function reminder() {
-    const now = Date.now();
     console.log('Checking for reminders...');
     
     Object.keys(userSessions).forEach((chatId) => {
+      const now = Date.now();
       const session = userSessions[chatId];
   
       if (session.done || session.waiting) return;
   
       const minutesSinceLastMessage = (now - session.lastSendTime) / 60000;
-  
+
       if (minutesSinceLastMessage >= 2 && minutesSinceLastMessage <= 10) {
         console.log('sending a reminder');
         bot.sendMessage(chatId, `Hello ${applicantName}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
@@ -41,7 +43,7 @@ setInterval(reminder, 30000);
 
 function setLastSendTime(chatId) {
     userSessions[chatId].lastSendTime = Date.now();
-    console.log('Updated session:', userSessions[chatId]);
+    console.log('Updated user:', userSessions[chatId]);
 }
 
 let applicantName = 'Luis';
@@ -65,11 +67,11 @@ export async function POST(req) {
     }
 
     if(user.done){
-        await bot.sendMessage(chatId,`You are already ready to take your ALTA evaluation. I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
-            -	You must use a computer. 
-            -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
-            -	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
-            \nThat’s it for now. Thanks for your time`);
+        await bot.sendMessage(chatId,`You are already ready to take your ALTA evaluation. I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:
+            - You must use a computer. 
+            - You have to call the number 14049203888 and then enter the access code that has been provided via email.
+            - In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
+            \nThat's it for now. Thanks for your time`);
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
@@ -109,7 +111,7 @@ export async function POST(req) {
             },
         });
     }
-    else if (callbackData === 'yes_read_email' || callbackData === 'done_read_email'){
+    if (callbackData === 'yes_read_email' || callbackData === 'done_read_email'){
         await bot.sendMessage(chatId, `Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?`, {
             reply_markup: {
                 inline_keyboard: [
@@ -120,16 +122,16 @@ export async function POST(req) {
         });
     }
 
-    if (callbackData === 'no_logged'){
-        await bot.sendMessage(chatId, `Please contact with the HR, And when you log in successfully please press 'DONE'`,{
-            reply_markup: {
-                inline_keyboard: [
-                [{ text: 'DONE', callback_data: 'done_logged' }],
-                ],
-            },
-        });
-    }
-    else if (callbackData === 'yes_logged' ||  callbackData === 'done_logged'){
+    // if (callbackData === 'no_logged'){
+    //     await bot.sendMessage(chatId, `Please contact with the HR, And when you log in successfully please press 'DONE'`,{
+    //         reply_markup: {
+    //             inline_keyboard: [
+    //             [{ text: 'DONE', callback_data: 'done_logged' }],
+    //             ],
+    //         },
+    //     });
+    // }
+    if (callbackData === 'yes_logged' ||  callbackData === 'done_logged'){
         await bot.sendMessage(chatId, `Now, access to the Scheduled Calls button in our call center. You will see some calls have been scheduled for you. Three of them are labelled as TEST CALL and the other three are labelled as ALTA`, {
             reply_markup: {
                 inline_keyboard: [
@@ -140,16 +142,16 @@ export async function POST(req) {
         });
     }
 
-    if (callbackData === 'no_see_calls'){
-        await bot.sendMessage(chatId, `Please contact with the HR, And when you see the calls successfully please press 'DONE'`,{
-            reply_markup: {
-                inline_keyboard: [
-                [{ text: 'DONE', callback_data: 'done_see_calls' }],
-                ],
-            },
-        });
-    }
-    else if (callbackData === 'yes_see_calls' ||  callbackData === 'done_see_calls'){
+    // if (callbackData === 'no_see_calls'){
+    //     await bot.sendMessage(chatId, `Please contact with the HR, And when you see the calls successfully please press 'DONE'`,{
+    //         reply_markup: {
+    //             inline_keyboard: [
+    //             [{ text: 'DONE', callback_data: 'done_see_calls' }],
+    //             ],
+    //         },
+    //     });
+    // }
+    if (callbackData === 'yes_see_calls' ||  callbackData === 'done_see_calls'){
         await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.`);
     }
 
@@ -157,25 +159,23 @@ export async function POST(req) {
         const photoId = screenshot.file_id;
         const photoSize = screenshot.file_size;
         // const photo = await bot.getFile(photoId);
-        if (! getUserSession(chatId).firstScreenId){
+        if (! user.firstScreenId){
             userSessions[chatId].firstScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded first photo with size ${photoSize}`);
-            await bot.sendMessage(chatId, `Perfect, thanks for that screenshot. Have you hung up already? Was the audio clear?`, {
+            await bot.sendMessage(chatId, `Perfect, thanks for that screenshot. Have you hung up already?`, {
                 reply_markup: {
                     inline_keyboard: [
-                    [{ text: 'Yes I did hung up and the audio was clear', callback_data: 'yes_voice_clear' }],
-                    [{ text: 'Yes I did hung up BUT the audio was not clear', callback_data: 'no_voice_clear' }],
-                    [{ text: 'No I did not hung up and the audio was clear', callback_data: 'no_voice_clear' }],
-                    [{ text: 'No I did not hung up and the audio was not clear', callback_data: 'no_voice_clear' }],
+                    [{ text: 'Yes I did hung up', callback_data: 'yes_hung_up' }],
+                    [{ text: 'Yes I did hung up BUT the audio was not clear', callback_data: 'no_hung_up' }],
                     ],
                 },
             });
         }
-        else if (getUserSession(chatId).firstScreenId && ! getUserSession(chatId).secondScreenId){
+        else if (user.firstScreenId && ! user.secondScreenId){
             userSessions[chatId].secondScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded second photo with size ${photoSize}, please upload the third screenshot`);
         }
-        else if(getUserSession(chatId).firstScreenId && getUserSession(chatId).secondScreenId && ! getUserSession(chatId).thirdScreenId){
+        else if(user.firstScreenId && user.secondScreenId && ! user.thirdScreenId){
             userSessions[chatId].thirdScreenId = photoId;
             await bot.sendMessage(chatId,`you uploaded third photo with size ${photoSize}`);
             await bot.sendMessage(chatId, `Perfect, thanks for the screenshots. Have you hung up already? Was the audio clear for both numbers?`, {
@@ -189,12 +189,31 @@ export async function POST(req) {
                 },
             });
         }
-        else if (getUserSession(chatId).firstScreenId && getUserSession(chatId).secondScreenId && getUserSession(chatId).thirdScreenId){
+        else if (user.firstScreenId && user.secondScreenId && user.thirdScreenId){
             await bot.sendMessage(chatId,`you already uploaded the 3 screenshots for the 3 test calls`);
         }
     }
 
+    if (callbackData === 'yes_hung_up' || callbackData === 'done_hung_up'){
+        await bot.sendMessage(chatId,'Great!\nWas the audio clear?',{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'Yes it was clear',callback_data:'yes_voice_clear'}],
+                    [{text:'No it was not clear',callback_data:'no_voice_clear'}]
+                ]
+            }
+        })
+    }
 
+    if (callbackData === 'no_hung_up'){
+        await bot.sendMessage(chatId,'Please hung up!\nClick "DONE" when you hung up',{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'Yes it was clear',callback_data:'done_hung_up'}],
+                ]
+            }
+        })
+    }
 
     if (callbackData === 'yes_voice_clear'){
         await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
@@ -204,14 +223,16 @@ export async function POST(req) {
         await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
             -	You must use a computer. 
             -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
-            -	In case the access code doesn’t work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
+            -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
             \nThat’s it for now. Thanks for your time`);
             userSessions[chatId].done = true
     }
 
-    if (callbackData === 'no_voice_clear'){
+    if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls'){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
         userSessions[chatId].waiting = true
+        const userName = body.message?.from.username || body.callback_query?.from.username
+        await bot.sendMessage(romanySupID,`Applicant @${userName} has a problem during the verification (${callbackData}).`)
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
