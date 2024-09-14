@@ -66,7 +66,7 @@ export async function POST(req) {
 
     if (!chatId) throw new Error('chatId is missing');
 
-    if (callbackData.includes(',')){
+    if (chatId === romanySupID && callbackData.includes(',')){
         console.log('support is here');
         let [userId,solver] = callbackData.split(',');
         let user = getUserSession(userId);
