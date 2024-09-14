@@ -4,15 +4,23 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { webHook: true });
 
 let userSessions = {};
-const itSupportId = '826345981';
+const luisSupId = '826345981';
 const romanySupID = '1337765689';
+let techName = 'Romany';
 
-function getUserSession(chatId) {
+
+function getUserSession(chatId,applicantName) {
   if (!userSessions[chatId]) {
     userSessions[chatId] = {
+      name:applicantName,
+      readEmail:false,
+      logged:false,
+      seeCalls:false,
       firstScreenId: null,
+      firstAudioClear:false,
       secondScreenId: null,
       thirdScreenId: null,
+      finishAudioClear:false,
       waiting:false,
       done:false,
       lastSendTime:Date.now()
@@ -46,20 +54,33 @@ function setLastSendTime(chatId) {
     console.log('Updated user:', userSessions[chatId]);
 }
 
-let applicantName = 'Luis';
-let techName = 'Romany';
 
 export async function POST(req) {
   try {
     const body = await req.json();
     const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
+    const name = body.message?.from.first_name || body.callback_query?.from.first_name
     const text = body.message?.text;
     const callbackData = body.callback_query?.data;
     const file = body.message?.document?.file_name;
 
     if (!chatId) throw new Error('chatId is missing');
 
-    let user = getUserSession(chatId);
+    if (chatId === romanySupID){
+        let [userId,_problem,solver] = callbackData.split(',');
+        let user = getUserSession[userId];
+        await bot.sendMessage(chatId,'Thank you, I will notify the applicant.');
+        await bot.sendMessage(userId,`Hello ${user.name}, the IT support solved the problem please press 'CONTINUE' to continue the verification steps`,{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'CONTINUE',callback_data:solver}]
+                ]
+            }
+        });
+        return new Response(JSON.stringify({ success: true }), { status: 200 });
+    }
+
+    let user = getUserSession(chatId,name);
 
     if (user.waiting){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
@@ -92,7 +113,7 @@ export async function POST(req) {
     }
 
     if (text === '/start') {
-        await bot.sendMessage(chatId, `Hello ${applicantName}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
+        await bot.sendMessage(chatId, `Hello ${user.applicantName}, this is ${techName} from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`, {
             reply_markup: {
                 inline_keyboard: [
                 [{ text: 'Yes I read it', callback_data: 'yes_read_email' }],
@@ -120,6 +141,7 @@ export async function POST(req) {
                 ],
             },
         });
+        userSessions[chatId].readEmail = true;
     }
 
     // if (callbackData === 'no_logged'){
@@ -140,6 +162,7 @@ export async function POST(req) {
                 ],
             },
         });
+        userSessions[chatId].logged = true
     }
 
     // if (callbackData === 'no_see_calls'){
@@ -153,6 +176,7 @@ export async function POST(req) {
     // }
     if (callbackData === 'yes_see_calls'){
         await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.`);
+        userSessions[chatId].seeCalls = true
     }
 
     if (screenshot){
@@ -236,6 +260,7 @@ export async function POST(req) {
 
     if (callbackData === 'yes_voice_clear'){
         await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
+        userSessions[chatId].firstAudioClear = true
     }
 
     if (callbackData === 'yes_voice_clear_finish'){
@@ -244,14 +269,22 @@ export async function POST(req) {
             -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
             -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
             \nThat’s it for now. Thanks for your time`);
+            userSessions[chatId].finishAudioClear = true
             userSessions[chatId].done = true
     }
 
     if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls' || callbackData === 'no_voice_clear_finish'){
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
         userSessions[chatId].waiting = true
-        const userName = body.message?.from.username || body.callback_query?.from.username
-        await bot.sendMessage(itSupportId,`Applicant @${userName} has a problem during the verification (${callbackData}).`)
+        const userName = body.message?.from.username || body.callback_query?.from.username;
+        let solver = callbackData.replace('no','yes')
+        await bot.sendMessage(romanySupID,`Applicant @${userName} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
+            reply_markup:{
+                inline_keyboard:[
+                    [{text:'SOLVED',callback_data:`${chatId},${callbackData},${solver}`}]
+                ]
+            }
+        })
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
