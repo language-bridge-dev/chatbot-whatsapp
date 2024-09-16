@@ -261,7 +261,7 @@ export async function POST(req) {
     }
 
     if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls' || callbackData === 'no_voice_clear_finish'){
-        await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
+        await bot.sendMessage(chatId,`A techincal assistant from our team will contact you. Please, be patient.`);
         userSessions[chatId].waiting = true
         let solver = callbackData.replace('no','yes');
         await bot.sendMessage(luisSupId,`Applicant @${user.name} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
