@@ -138,6 +138,7 @@ export async function POST(req) {
     }
 
     if (callbackData === 'yes_read_email'){
+        userSessions[chatId].readEmail = true;
         await bot.sendMessage(chatId, `Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?`, {
             reply_markup: {
                 inline_keyboard: [
@@ -146,10 +147,10 @@ export async function POST(req) {
                 ],
             },
         });
-        userSessions[chatId].readEmail = true;
     }
 
     if (callbackData === 'yes_logged'){
+        userSessions[chatId].logged = true;
         await bot.sendMessage(chatId, `Now, access to the Scheduled Calls button in our call center. You will see some calls have been scheduled for you. Three of them are labelled as TEST CALL and the other three are labelled as ALTA`, {
             reply_markup: {
                 inline_keyboard: [
@@ -158,12 +159,11 @@ export async function POST(req) {
                 ],
             },
         });
-        userSessions[chatId].logged = true
     }
 
     if (callbackData === 'yes_see_calls'){
+        userSessions[chatId].seeCalls = true;
         await bot.sendMessage(chatId, `Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don’t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.`);
-        userSessions[chatId].seeCalls = true
     }
 
     if (screenshot){
@@ -246,18 +246,18 @@ export async function POST(req) {
     }
 
     if (callbackData === 'yes_voice_clear'){
+        userSessions[chatId].firstAudioClear = true;
         await bot.sendMessage(chatId,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`);
-        userSessions[chatId].firstAudioClear = true
     }
 
     if (callbackData === 'yes_voice_clear_finish'){
+        userSessions[chatId].finishAudioClear = true
+        userSessions[chatId].done = true
         await bot.sendMessage(chatId,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
             -	You must use a computer. 
             -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
             -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
             \nThat’s it for now. Thanks for your time`);
-            userSessions[chatId].finishAudioClear = true
-            userSessions[chatId].done = true
     }
 
     if (callbackData === 'no_voice_clear' || callbackData === 'no_logged' || callbackData === 'no_see_calls' || callbackData === 'no_voice_clear_finish'){
