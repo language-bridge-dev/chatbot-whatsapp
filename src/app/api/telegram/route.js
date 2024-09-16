@@ -69,7 +69,7 @@ export async function POST(req) {
     if (!chatId) throw new Error('chatId is missing');
 
     if (chatId == luisSupId){
-        console.log('support is here');
+        console.log('support is here: ', name);
         let [userId,solver] = callbackData.split(',');
         userSessions[userId].waiting = false;
         console.log('user not waiting');
@@ -264,7 +264,7 @@ export async function POST(req) {
         await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
         userSessions[chatId].waiting = true
         let solver = callbackData.replace('no','yes');
-        await bot.sendMessage(romanySupID,`Applicant @${user.name} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
+        await bot.sendMessage(luisSupId,`Applicant @${user.name} has a problem during the verification (${callbackData}).\nPlease click 'SOLVED' when you done`,{
             reply_markup:{
                 inline_keyboard:[
                     [{text:'SOLVED',callback_data:`${chatId},${solver}`}],
