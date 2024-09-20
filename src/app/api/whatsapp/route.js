@@ -160,11 +160,11 @@ export async function POST(req) {
 const sendMessageOptions = async function (number,message,options) {
   try {
     await client.messages.create({
-      from:twilioWhatsAppNumber,
-      to:number,
+      from: twilioWhatsAppNumber,
+      to: number,
+      body: message,
       interactive: {
         type: 'button',
-        body: { text: message },
         action: { buttons: options },
       },
     })
@@ -178,9 +178,9 @@ const sendMessageOptions = async function (number,message,options) {
 const sendMessageReply = async function (number,message) {
   try {
     await client.messages.create({
-      from:twilioWhatsAppNumber,
-      to:number,
-      body:message
+      from: twilioWhatsAppNumber,
+      to: number,
+      body: message
     })
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
