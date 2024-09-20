@@ -87,7 +87,7 @@ export async function POST(req) {
     let user = getUserSession(chatId,name);
 
     if (user.waiting){
-        await bot.sendMessage(chatId,`A human from IT support will contact you, Please be patient.`);
+        await bot.sendMessage(chatId,`A techincal assistant from our team will contact you. Please, be patient.`);
         return new Response(JSON.stringify({ success: true }), { status: 200 });
     }
 
