@@ -50,13 +50,19 @@ export async function POST(req) {
 
   // try {
     const body = await req.text();
+    console.log('body'+body);
+    
     const params = new URLSearchParams(body);
+    console.log('params',params);
+    
     const name = params.get('ProfileName');
     const whatsappNumber = params.get('From');
     const text = params.get('Body')?.toLowerCase().trim();
+    console.log('name',name);
+    console.log('number',whatsappNumber);
+    console.log('message',text);
     // const buttonId = params.get('Interactive')?.Button?.Payload;
     // const buttonText = params.get('Interactive')?.Button?.Text;
-    console.log(text,whatsappNumber,name);
     
   //   // if (whatsappNumber === supNumber) {
   //   //   const [number, solver] = buttonId.split(',');
@@ -87,15 +93,15 @@ export async function POST(req) {
 
   //   setLastSendTime(whatsappNumber);
 
-  //   if (text === 'start') {
-  //     await sendMessageOptions(whatsappNumber,
-  //       'Hello , this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.',
-  //       [
-  //         {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
-  //         {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
-  //       ]
-  //     )
-  //   }
+    if (text === 'start') {
+      await sendMessageOptions(whatsappNumber,
+        'Hello , this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.',
+        [
+          {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
+          {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
+        ]
+      )
+    }
 
   //   if (buttonId === 'no_read') {
   //     await sendMessageOptions(whatsappNumber,
