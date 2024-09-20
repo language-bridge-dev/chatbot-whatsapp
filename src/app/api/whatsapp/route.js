@@ -29,10 +29,11 @@ function reminder() {
 
 setInterval(reminder, 30000);
 
-function getUserSession(number) {
+function getUserSession(number,name) {
   if (!userSessions[number]) {
     console.log('found user');
     userSessions[number] = {
+      name:name,
       firstScreenId: null,
       secondScreenId: null,
       thirdScreenId: null,
@@ -46,15 +47,16 @@ function getUserSession(number) {
 
 
 export async function POST(req) {
-  let body = await req.text();
-  let params = new URLSearchParams(body);
-  console.log(params);
+
   // try {
-  //   const body = await req.json();
-  //   const whatsappNumber = body.from;
-  //   const text = body.Body.toLowerCase().trim();
-  //   const buttonId = body.Interactive?.Button?.Payload;
-  //   const buttonText = body.Interactive?.Button?.Text;
+    const body = await req.text();
+    const params = new URLSearchParams(body);
+    const name = params.get('ProfileName');
+    const whatsappNumber = params.get('From');
+    const text = params.get('Body')?.toLowerCase().trim();
+    // const buttonId = params.get('Interactive')?.Button?.Payload;
+    // const buttonText = params.get('Interactive')?.Button?.Text;
+    console.log(text,whatsappNumber,name);
     
   //   // if (whatsappNumber === supNumber) {
   //   //   const [number, solver] = buttonId.split(',');
@@ -66,7 +68,7 @@ export async function POST(req) {
   //   //   await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
   //   // }
 
-  //   let user = getUserSession(whatsappNumber);
+  //   let user = getUserSession(whatsappNumber,name);
 
   //   // options must be [{type:'reply',reply:{id:'ID',title:''}}]    
   //   // type=> fixed  ID=> your id that coming in the request  title=> the text that showed in the user chat
