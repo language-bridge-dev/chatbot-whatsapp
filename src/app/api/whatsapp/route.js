@@ -46,7 +46,9 @@ function getUserSession(number) {
 
 
 export async function POST(req) {
-  console.log(req.json());
+  body = await req.text();
+  params = new URLSearchParams(body);
+  console.log(params);
   // try {
   //   const body = await req.json();
   //   const whatsappNumber = body.from;
