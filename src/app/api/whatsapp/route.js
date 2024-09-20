@@ -5,7 +5,8 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = new Twilio(accountSid, authToken);
 
 let userSessions = {};
-const twilioWhatsAppNumber = 'whatsapp:+18632234730';
+// const twilioWhatsAppNumber = 'whatsapp:+18632234730';
+const twilioWhatsAppNumber = 'whatsapp:+14155238886';
 const supNumber = 'whatsapp:+201062791045';
 
 function reminder() {
