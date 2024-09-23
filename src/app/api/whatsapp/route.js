@@ -55,15 +55,15 @@ export async function POST(req) {
     const buttonId = params.get('Interactive')?.Button?.Payload;
     const buttonText = params.get('Interactive')?.Button?.Text;
     
-    if (whatsappNumber === supNumber) {
-      const [number, solver] = buttonId.split(',');
-      userSessions[number].waiting = false;
-      await sendMessageOptions(number,
-        'The IT support solved the problem. Please press "CONTINUE" to proceed.',
-        [{type:'reply',reply:{id:solver,text:'CONTINUE'}}]
-      );
-      await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
-    }
+    // if (whatsappNumber === supNumber) {
+    //   const [number, solver] = buttonId.split(',');
+    //   userSessions[number].waiting = false;
+    //   await sendMessageOptions(number,
+    //     'The IT support solved the problem. Please press "CONTINUE" to proceed.',
+    //     [{type:'reply',reply:{id:solver,text:'CONTINUE'}}]
+    //   );
+    //   await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
+    // }
 
     let user = getUserSession(whatsappNumber,name);
 
