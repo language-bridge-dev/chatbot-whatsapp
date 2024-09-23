@@ -146,7 +146,7 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber,'Please choose from the previous menu.')
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return new Response('', { status: 200 });
   
   } catch (error) {
     console.error('Error handling WhatsApp webhook:', error);
@@ -167,7 +167,6 @@ const sendMessageOptions = async function (number,message,options) {
         action: { buttons: options },
       },
     })
-    return new Response('', { status: 200 });
   } catch (error) {
     console.error(`Failed to send message options: ${error}`);
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
@@ -181,7 +180,6 @@ const sendMessageReply = async function (number,message) {
       to:number,
       body:message
     })
-    return new Response('', { status: 200 });
   } catch (error) {
     console.error(`Failed to send message options: ${error}`);
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
