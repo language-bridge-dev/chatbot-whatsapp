@@ -49,7 +49,6 @@ function getUserSession(number,name) {
   return userSessions[number];
 }
 
-
 export async function POST(req) {
   try {
     const body = await req.text();
@@ -89,6 +88,12 @@ export async function POST(req) {
 
     setLastSendTime(whatsappNumber);
 
+    // let screenshot;
+    
+    // if (){
+    //     screenshot = ;
+    // }
+
     if (text === 'start') {
       await sendMessageOptions(whatsappNumber,
         'Hello , this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.',
@@ -99,7 +104,7 @@ export async function POST(req) {
       )
     }
 
-    else if (buttonId === 'no_read') {
+     if (buttonId === 'no_read') {
       await sendMessageOptions(whatsappNumber,
         'Please read it and when you finish, press "DONE".',
         [
@@ -108,7 +113,7 @@ export async function POST(req) {
       )
     }
 
-    else if (buttonId === 'yes_read') {
+     if (buttonId === 'yes_read') {
       await sendMessageOptions(whatsappNumber,
         'Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?',
         [
@@ -118,7 +123,7 @@ export async function POST(req) {
       )
     }
 
-    else if (buttonId === 'yes_logged') {
+     if (buttonId === 'yes_logged') {
       await sendMessageOptions(whatsappNumber,
         'Great! Now please log in to your evaluation portal and confirm that you are able to see the audio and video setup.',
         [
@@ -128,11 +133,11 @@ export async function POST(req) {
       )
     }
 
-    else if (buttonId === 'yes_see_calls') {
+     if (buttonId === 'yes_see_calls') {
       await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.')
     }
 
-    else if (buttonId === 'no_logged' || buttonId === 'no_see_calls') {
+     if (buttonId === 'no_logged' || buttonId === 'no_see_calls') {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
       await sendMessageOptions(supNumber,
@@ -142,9 +147,10 @@ export async function POST(req) {
         ]
       )
     }
-    else {
-      await sendMessageReply(whatsappNumber,'Please choose from the previous menu.')
-    }
+
+    // {
+    //   await sendMessageReply(whatsappNumber,'Please choose from the previous menu.')
+    // }
 
     return new Response('', { status: 200 });
   
