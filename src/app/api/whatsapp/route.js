@@ -28,6 +28,11 @@ function reminder() {
 
 setInterval(reminder, 30000);
 
+function setLastSendTime(number) {
+  userSessions[number].lastSendTime = Date.now();
+  console.log('Updated user:', userSessions[number]);
+}
+
 function getUserSession(number,name) {
   if (!userSessions[number]) {
     console.log('found user');
