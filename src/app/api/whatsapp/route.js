@@ -53,6 +53,8 @@ export async function POST(req) {
   try {
     const body = await req.text();
     const params = new URLSearchParams(body);
+    console.log(params);
+    
     const name = params.get('ProfileName');
     const whatsappNumber = params.get('From');
     const text = params.get('Body')?.toLowerCase().trim();
