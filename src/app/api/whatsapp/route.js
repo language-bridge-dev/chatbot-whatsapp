@@ -34,19 +34,26 @@ function setLastSendTime(number) {
 }
 
 function getUserSession(number,name) {
+  let newUser = false;
   if (!userSessions[number]) {
-    console.log('found user');
+    newUser = true;
     userSessions[number] = {
       name:name,
+      readEmail:false,
+      logged:false,
+      seeCalls:false,
       firstScreenId: null,
+      firstHangUp:false,
+      firstAudioClear:false,
       secondScreenId: null,
       thirdScreenId: null,
+      finishAudioClear:false,
       waiting:false,
       done:false,
       lastSendTime:Date.now()
     };
   }
-  return userSessions[number];
+  return [userSessions[number],newUser];
 }
 
 export async function POST(req) {
@@ -71,13 +78,14 @@ export async function POST(req) {
     //   await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
     // }
 
-    let user = getUserSession(whatsappNumber,name);
+    let [user, newUser] = getUserSession(whatsappNumber,name);
 
     // options must be [{type:'reply',reply:{id:'ID',title:''}}]    
     // type=> fixed  ID=> your id that coming in the request  title=> the text that showed in the user chat
 
     if (user.waiting) {
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      return new Response('', { status: 200 });
     }
 
     if (user.done) {
@@ -86,46 +94,58 @@ export async function POST(req) {
             - You have to call the number 14049203888 and then enter the access code that has been provided via email.
             - In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
             \nThat's it for now. Thanks for your time`)
+    
+      return new Response('', { status: 200 });
     }
 
     setLastSendTime(whatsappNumber);
 
-    // let screenshot;
+    if(params.get('NumMedia') == 1 && params.get('MessageType') != 'image') {
+      await sendMessageReply(whatsappNumber,`Please, upload screenshot as a photo!\nDo not upload it as a file.`);
+      return new Response('', { status: 200 });
+    }
+
+    let screenshot;
     
-    // if (){
-    //     screenshot = ;
-    // }
+    if (params.get('NumMedia') == 1 && params.get('MessageType') == 'image'){
+      screenshot = params.get('MediaUrl0');
+    }
 
     if (text === 'start') {
-      await sendMessageOptions(whatsappNumber,
-        'Hello , this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.',
-        [
-          {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
-          {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
-        ]
-      )
+      // await sendMessageOptions(whatsappNumber,
+      //   `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,
+      //   [
+      //     {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
+      //     {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
+      //   ]
+      // )
+      await sendMessageReply(whatsappNumber,`Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.\nPlease answer with yes or no`)
     }
 
-     if (buttonId === 'no_read') {
-      await sendMessageOptions(whatsappNumber,
-        'Please read it and when you finish, press "DONE".',
-        [
-          {type:'reply',reply:{id:'yes_read',title:'Done reading the email'}},
-        ]
-      )
+    else if (text === 'no' && !user.readEmail) {
+      // await sendMessageOptions(whatsappNumber,
+      //   'Please read it and when you finish, press "DONE".',
+      //   [
+      //     {type:'reply',reply:{id:'yes_read',title:'Done reading the email'}},
+      //   ]
+      // )
+      await sendMessageReply(whatsappNumber,'Please read it and when you finish, write "done".')
     }
 
-     if (buttonId === 'yes_read') {
-      await sendMessageOptions(whatsappNumber,
-        'Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?',
-        [
-          {type:'reply',reply:{id:'yes_logged',title:'Yes I logged in'}},
-          {type:'reply',reply:{id:'no_logged',title:'No I cannot log in'}}
-        ]      
-      )
+    else if ((text === 'yes' || text === 'done') && !user.readEmail) {
+      userSessions[whatsappNumber].readEmail = true;
+      // await sendMessageOptions(whatsappNumber,
+      //   'Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?',
+      //   [
+      //     {type:'reply',reply:{id:'yes_logged',title:'Yes I logged in'}},
+      //     {type:'reply',reply:{id:'no_logged',title:'No I cannot log in'}}
+      //   ]      
+      // )
+      await sendMessageReply(whatsappNumber,'Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?\nPlease answer with yes or no')
     }
 
-     if (buttonId === 'yes_logged') {
+    else if (text === 'yes' && !user.logged) {
+      userSessions[whatsappNumber].logged = true;
       await sendMessageOptions(whatsappNumber,
         'Great! Now please log in to your evaluation portal and confirm that you are able to see the audio and video setup.',
         [
@@ -135,8 +155,25 @@ export async function POST(req) {
       )
     }
 
-     if (buttonId === 'yes_see_calls') {
-      await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\n📎 Upload screenshot photo to continue.')
+    else if (text === 'yes' && !user.seeCalls) {
+      userSessions[whatsappNumber].seeCalls = true;
+      await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\nUpload screenshot photo to continue.')
+    }
+
+    if(screenshot){
+      if(!user.firstScreenId) {
+        userSessions[whatsappNumber].firstScreenId = screenshot;
+        sendMessageReply(whatsappNumber,'Perfect, thanks for that screenshot. Have you hung up already?\nPlease write yes or no!')
+      }
+      else if(!user.secondScreenId) {
+        userSessions[whatsappNumber].secondScreenId = screenshot;
+      }
+      else if(!user.thirdScreenId) {
+        userSessions[whatsappNumber].thirdScreenId = screenshot;
+      }
+      else {
+        await sendMessageReply(whatsappNumber,'You already added the 3 screenshots.\nPlease continue the steps or choose form the previous menu.')
+      }
     }
 
      if (buttonId === 'no_logged' || buttonId === 'no_see_calls') {
