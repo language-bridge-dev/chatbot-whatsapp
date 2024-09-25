@@ -129,11 +129,19 @@ export async function POST(req) {
     }
 
     if (text === 'start') {
-      await sendMessageOptions(whatsappNumber,
-        `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,[
-        {id:'yes_read',title:'Yes I read it'},
-        {id:'no_read',title:'No I did not read it'}
-      ])
+      // await sendMessageOptions(whatsappNumber,
+      //   `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,[
+      //   {id:'yes_read',title:'Yes I read it'},
+      //   {id:'no_read',title:'No I did not read it'}
+      // ])
+      await client.messages.create({
+        from:twilioWhatsAppNumber,
+        to:number,
+        contentSid: 'HXa0f997da03f784166d670e467bbe4b7b',
+        contentVariables: JSON.stringify({
+          name:name
+        }),
+      })
     }
     else if (buttonId === 'no_read') {
       await sendMessageOption(whatsappNumber,
