@@ -195,7 +195,7 @@ export async function POST(req) {
       const solvedID = buttonId.replace('no','yes');
       console.log(solvedID);
       
-      await sendSupport(supNumber,supName,'HX66619e631ae0e51072c1f76fd659fb85',waID,buttonText,applicantwaNumber,solvedID);
+      await sendSupport(supNumber,supName,'HXc3018dcc0abd4f5e07c3432e68e2c641',waID,buttonText,applicantwaNumber,solvedID);
     }
     else {
       await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
