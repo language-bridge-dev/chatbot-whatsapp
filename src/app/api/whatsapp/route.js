@@ -141,16 +141,16 @@ export async function POST(req) {
       })
     }
     else if (buttonId === 'no_read') {
-      // await client.messages.create({
-      //   from:twilioWhatsAppNumber,
-      //   to:whatsappNumber,
-      //   contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
-      //   contentVariables: JSON.stringify({
-      //     name:name,
-      //     yesOption:'read',
-      //     noOption:'read',
-      //   }),
-      // })
+      await client.messages.create({
+        from:twilioWhatsAppNumber,
+        to:whatsappNumber,
+        contentSid: 'HXef8fc98e5846a1a1dc1a6f2e12784fef',
+        contentVariables: JSON.stringify({
+          name:name,
+          step:'read it and when you finish press "CONTINUE"',
+          option:'read',
+        }),
+      })
     }
     else if (buttonId === 'yes_read') {
       await client.messages.create({
