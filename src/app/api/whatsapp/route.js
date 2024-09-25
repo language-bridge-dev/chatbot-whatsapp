@@ -127,13 +127,55 @@ export async function POST(req) {
     }
 
     if (text === 'start') {
-      await sendMessageOptions(whatsappNumber,
-        `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,
-        [
-          {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
-          {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
-        ]
-      )
+      // await sendMessageOptions(whatsappNumber,
+      //   `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,
+      //   [
+      //     {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
+      //     {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
+      //   ]
+      // )
+
+      const buttons = [
+        { label: 'Yes I read it', id: 'yes_read' },
+        { label: 'No I did not read it', id: 'no_read' }
+      ];
+      const variables=[`Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`]
+      
+      await client.messages.create({
+        from:twilioWhatsAppNumber,
+        to:whatsappNumber,
+        template:{
+          name: 'HX3eb4efa8fb8900593ed5d4e381e00e6d',
+          language: {
+            code: 'en',
+          },
+          components: [
+            {
+              type: 'body',
+              parameters: variables.map(variable => ({
+                type: 'text',
+                text: variable,
+              })),
+            },
+            {
+              type: 'button',
+              sub_type: 'quick_reply', 
+              parameters: buttons.map((button) => ({
+                type: 'text',
+                text: button.label,
+              })),
+            },
+            {
+              type: 'button',
+              sub_type: 'quick_reply',
+              parameters: buttons.map((button) => ({
+                type: 'payload',
+                payload: button.id,
+              })),
+            },
+          ]
+        },
+      });
     }
     else if (buttonId === 'no_read') {
       await sendMessageOptions(whatsappNumber,
