@@ -191,7 +191,7 @@ export async function POST(req) {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
       
-      const solvedID = whatsappNumber+'_'+buttonId.replace('no','yes')
+      const solvedID = `${whatsappNumber}_${buttonId.replace('no','yes')}`
       console.log(solvedID);
       
       await sendSupport(supNumber,supName,'HXe87111b01eadea8d90cfd8fb59914b8b',waID,buttonText,solvedID);
@@ -232,10 +232,10 @@ const sendYesNoOption = async function (number,name,contentSID,step,option) {
   })
 }
 
-const sendSupport = async function (number,name,contentSID,applicantNumber,problem,solvedID) {
+const sendSupport = async function (supNumber,name,contentSID,applicantNumber,problem,solvedID) {
   await client.messages.create({
     from:twilioWhatsAppNumber,
-    to:number,
+    to:supNumber,
     contentSid: contentSID,
     contentVariables: JSON.stringify({
       supName:name,
