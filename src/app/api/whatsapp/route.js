@@ -63,16 +63,16 @@ export async function POST(req) {
     const buttonId = params.get('ButtonPayload');
     const buttonText = params.get('ButtonText');
     
-    // if (whatsappNumber === supNumber) {
-    //   const [number, solver] = buttonId.split(',');
-    //   userSessions[number].waiting = false;
-    //   await sendMessageOption(number,
-    //     'The IT support solved the problem. Please press "CONTINUE" to proceed.',
-    //     {id:solver,text:'CONTINUE'}
-    //   );
-    //   await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
-    //   return new Response('', { status: 200 });
-    // }
+    if (whatsappNumber === supNumber) {
+      const [number, solver] = buttonId.split(/_(.+)/);
+      userSessions[number].waiting = false;
+      await sendMessageOption(number,
+        'The IT support solved the problem. Please press "CONTINUE" to proceed.',
+        {id:solver,text:'CONTINUE'}
+      );
+      await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
+      return new Response('', { status: 200 });
+    }
 
     let [user, newUser] = getUserSession(whatsappNumber);
 
@@ -181,11 +181,12 @@ export async function POST(req) {
     }
     else if (buttonId === 'yes_voice_clear_finish') {
       userSessions[whatsappNumber].done = true;
-      await sendMessageReply(whatsappNumber,`Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
-            -	You must use a computer. 
-            -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
-            -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
-            \nThat’s it for now. Thanks for your time`)
+      await sendMessageReply(whatsappNumber,
+        `Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
+        -	You must use a computer. 
+        -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
+        -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
+        \nThat’s it for now. Thanks for your time`)
     }
     else if (buttonId === 'no_logged' || buttonId === 'no_see_calls' || buttonId === 'no_voice_clear' || buttonId === 'no_voice_clear_finish') {
       userSessions[whatsappNumber].waiting = true;
