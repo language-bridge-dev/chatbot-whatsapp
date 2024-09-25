@@ -141,16 +141,16 @@ export async function POST(req) {
       })
     }
     else if (buttonId === 'no_read') {
-      await client.messages.create({
-        from:twilioWhatsAppNumber,
-        to:whatsappNumber,
-        contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
-        contentVariables: JSON.stringify({
-          name:name,
-          yesOption:'read',
-          noOption:'read',
-        }),
-      })
+      // await client.messages.create({
+      //   from:twilioWhatsAppNumber,
+      //   to:whatsappNumber,
+      //   contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
+      //   contentVariables: JSON.stringify({
+      //     name:name,
+      //     yesOption:'read',
+      //     noOption:'read',
+      //   }),
+      // })
     }
     else if (buttonId === 'yes_read') {
       await client.messages.create({
@@ -165,13 +165,15 @@ export async function POST(req) {
     }
     else if (buttonId === 'yes_logged') {
       userSessions[whatsappNumber].logged = true;
-      await sendMessageOptions(whatsappNumber,
-        'Great! Now please log in to your evaluation portal and confirm that you are able to see the audio and video setup.',
-        [
-          {id:'yes_see_calls',title:'Yes I can see the calls'},
-          {id:'no_see_calls',title:'No I cannot see the calls'},
-        ]
-      )
+      await client.messages.create({
+        from:twilioWhatsAppNumber,
+        to:whatsappNumber,
+        contentSid: 'HXff58415e0a26cc8e8910c0d1e6d5f250',
+        contentVariables: JSON.stringify({
+          yesOption:'see_calls',
+          noOption:'see_calls',
+        }),
+      })
     }
     else if (buttonId === 'yes_see_calls') {
       userSessions[whatsappNumber].seeCalls = true;
