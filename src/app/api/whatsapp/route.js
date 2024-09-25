@@ -61,21 +61,21 @@ export async function POST(req) {
     const buttonId = params.get('ButtonPayload');
     const buttonText = params.get('ButtonText');
     
-    // if (whatsappNumber === supNumber) {
-    //   const [number, solver] = buttonId.split(',');
-    //   userSessions[number].waiting = false;
-    //   await sendMessageOptions(number,
-    //     'The IT support solved the problem. Please press "CONTINUE" to proceed.',
-    //     [{type:'reply',reply:{id:solver,text:'CONTINUE'}}]
-    //   );
-    //   await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
-    //   return new Response('', { status: 200 });
-    // }
+    if (whatsappNumber === supNumber) {
+      const [number, solver] = buttonId.split(',');
+      userSessions[number].waiting = false;
+      await sendMessageOption(number,
+        'The IT support solved the problem. Please press "CONTINUE" to proceed.',
+        {id:solver,text:'CONTINUE'}
+      );
+      await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
+      return new Response('', { status: 200 });
+    }
 
     let [user, newUser] = getUserSession(whatsappNumber);
 
-    // options must be [{type:'reply',reply:{id:'ID',title:''}}]    
-    // type=> fixed  ID=> your id that coming in the request  title=> the text that showed in the user chat
+    // options must be [{id:'ID',title:''}]    
+    // ID=> your id that coming in the request  title=> the text that showed in the user chat
 
     if (user.waiting) {
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
@@ -105,9 +105,10 @@ export async function POST(req) {
     if(screenshot){
       if(!user.firstScreenId) {
         userSessions[whatsappNumber].firstScreenId = screenshot;
-        await sendMessageOptions(whatsappNumber,'Perfect, thanks for that screenshot. Have you hung up already?',[
-          {type:'reply',reply:{id:'yes_first_hung',title:'Yes I did hung up'}},
-          {type:'reply',reply:{id:'no_first_hung',title:'No I did not hung up'}}
+        await sendMessageOptions(whatsappNumber,
+          'Perfect, thanks for that screenshot. Have you hung up already?',[
+          {id:'yes_first_hung',title:'Yes I did hung up'},
+          {id:'no_first_hung',title:'No I did not hung up'},
         ])
       }
       else if(!user.secondScreenId) {
@@ -115,9 +116,10 @@ export async function POST(req) {
       }
       else if(!user.thirdScreenId) {
         userSessions[whatsappNumber].thirdScreenId = screenshot;
-        await sendMessageOptions(whatsappNumber,'Perfect, thanks for the screenshots. Have you hung up already for both calls?',[
-          {type:'reply',reply:{id:'yes_hung',title:'Yes I did hung up for both calls'}},
-          {type:'reply',reply:{id:'no_hung',title:'No I did not hung up for both calls'}}
+        await sendMessageOptions(whatsappNumber,
+          'Perfect, thanks for the screenshots. Have you hung up already for both calls?',[
+          {id:'yes_hung',title:'Yes I did hung up for both calls'},
+          {id:'no_hung',title:'No I did not hung up for both calls'},
         ])
       }
       else {
@@ -128,17 +130,15 @@ export async function POST(req) {
 
     if (text === 'start') {
       await sendMessageOptions(whatsappNumber,
-        `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,
-        [
-          {type:'reply',reply:{id:'yes_read',title:'Yes I read it'}},
-          {type:'reply',reply:{id:'no_read',title:'No I did not read it'}}
-        ]
-      )
+        `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,[
+        {id:'yes_read',title:'Yes I read it'},
+        {id:'no_read',title:'No I did not read it'}
+      ])
     }
     else if (buttonId === 'no_read') {
       await sendMessageOption(whatsappNumber,
         'Please read it and when you finish, press "DONE".',
-        {type:'reply',reply:{id:'yes_read',title:'Done reading the email'}},
+        {id:'yes_read',title:'Done reading the email'},
       )
     }
     else if (buttonId === 'yes_read') {
@@ -146,8 +146,8 @@ export async function POST(req) {
       await sendMessageOptions(whatsappNumber,
         'Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?',
         [
-          {type:'reply',reply:{id:'yes_logged',title:'Yes I logged in'}},
-          {type:'reply',reply:{id:'no_logged',title:'No I cannot log in'}}
+          {id:'yes_logged',title:'Yes I logged in'},
+          {id:'no_logged',title:'No I cannot log in'},
         ]      
       )
     }
@@ -156,8 +156,8 @@ export async function POST(req) {
       await sendMessageOptions(whatsappNumber,
         'Great! Now please log in to your evaluation portal and confirm that you are able to see the audio and video setup.',
         [
-          {type:'reply',reply:{id:'yes_see_calls',title:'Yes I can see the calls'}},
-          {type:'reply',reply:{id:'no_see_calls',title:'No I cannot see the calls'}}
+          {id:'yes_see_calls',title:'Yes I can see the calls'},
+          {id:'no_see_calls',title:'No I cannot see the calls'},
         ]
       )
     }
@@ -168,13 +168,13 @@ export async function POST(req) {
     else if (buttonId === 'no_first_hung') {
       await sendMessageOption(whatsappNumber,
         'Please hung up!\nClick "DONE" when you hung up.',
-        {type:'reply',reply:{id:'yes_first_hung',title:'DONE'}}
+        {id:'yes_first_hung',title:'DONE'},
       )
     }
     else if (buttonId === 'yes_first_hung') {
       await sendMessageOptions(whatsappNumber, 'Great!\nWas the audio clear?',[
-        {type:'reply',reply:{id:'yes_voice_clear',title:'Yes the voice was clear'}},
-        {type:'reply',reply:{id:'no_voice_clear',title:'No the voice was not clear'}}
+        {id:'yes_voice_clear',title:'Yes the voice was clear'},
+        {id:'no_voice_clear',title:'No the voice was not clear'},
       ])
     }
     else if (buttonId === 'yes_voice_clear') {
@@ -183,13 +183,13 @@ export async function POST(req) {
     else if (buttonId === 'no_hung') {
       await sendMessageOption(whatsappNumber,
         'Please hung up!\nClick "DONE" when you hung up',
-        {type:'reply',reply:{id:'yes_hung',title:'DONE'}}
+        {id:'yes_hung',title:'DONE'},
       )
     }
     else if (buttonId === 'yes_hung') {
       await sendMessageOptions(whatsappNumber,'Great!\nWas the audio clear for both calls?',[
-        {type:'reply',reply:{id:'yes_voice_clear_finish',title:'Yes the voice was clear for both calls'}},
-        {type:'reply',reply:{id:'no_voice_clear_finish',title:'No the voice was not clear for both calls'}}
+        {id:'yes_voice_clear_finish',title:'Yes the voice was clear for both calls'},
+        {id:'no_voice_clear_finish',title:'No the voice was not clear for both calls'},
       ])
     }
     else if (buttonId === 'yes_voice_clear_finish') {
@@ -205,15 +205,14 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
       await sendMessageOption(supNumber,
         `Hello, applicant ${name} ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
-          {type:'reply',reply:{id:`${whatsappNumber},${buttonId.replace('yes','no')}`,title:'DONE'}}
+          {id:`${whatsappNumber},${buttonId.replace('yes','no')}`,title:'DONE'},
       )
     }
     else {
-      await sendMessageReply(whatsappNumber,'Please choose an option form the previous list')
+      await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
     }
 
     return new Response('', { status: 200 });
-  
   } catch (error) {
     console.error('Error handling WhatsApp webhook:', error);
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
@@ -228,10 +227,10 @@ const sendMessageOptions = async function (number,message,options) {
       contentSid: 'HX8867e37db2e45a5060ff3b57983f96d5',
       contentVariables: JSON.stringify({
           1: message,
-          2: options[0].reply.title,
-          3: options[0].reply.id,
-          4: options[1].reply.title,
-          5: options[1].reply.id,
+          2: options[0].title,
+          3: options[0].id,
+          4: options[1].title,
+          5: options[1].id,
         }),
       })
   } catch (error) {
@@ -248,8 +247,8 @@ const sendMessageOption = async function (number,message,option) {
       contentSid: 'HXabb62a4134b2c52500cecc2b2c7d6efd',
       contentVariables: JSON.stringify({
           1: message,
-          2: option.reply.title,
-          3: option.reply.id,
+          2: option.title,
+          3: option.id,
         }),
       })
   } catch (error) {
