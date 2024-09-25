@@ -58,8 +58,8 @@ export async function POST(req) {
     const name = params.get('ProfileName');
     const whatsappNumber = params.get('From');
     const text = params.get('Body')?.toLowerCase().trim();
-    const buttonId = params.get('Interactive')?.Button?.Payload;
-    const buttonText = params.get('Interactive')?.Button?.Text;
+    const buttonId = params.get('ButtonPayload');
+    const buttonText = params.get('ButtonText');
     
     // if (whatsappNumber === supNumber) {
     //   const [number, solver] = buttonId.split(',');
