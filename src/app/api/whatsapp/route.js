@@ -129,11 +129,6 @@ export async function POST(req) {
     }
 
     if (text === 'start') {
-      // await sendMessageOptions(whatsappNumber,
-      //   `Hello ${name}, this is technical support from Multilingual Interpreters and Translators IT Department. I am writing to run some validations before taking your evaluation tomorrow. First of all, I would like you to confirm that you have checked the email sent by HR and that you have read the contents of this email, including the Manual of Use attached to it, and that you have watched the video instructive.`,[
-      //   {id:'yes_read',title:'Yes I read it'},
-      //   {id:'no_read',title:'No I did not read it'}
-      // ])
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:whatsappNumber,
@@ -146,20 +141,27 @@ export async function POST(req) {
       })
     }
     else if (buttonId === 'no_read') {
-      await sendMessageOption(whatsappNumber,
-        'Please read it and when you finish, press "DONE".',
-        {id:'yes_read',title:'Done reading the email'},
-      )
+      await client.messages.create({
+        from:twilioWhatsAppNumber,
+        to:whatsappNumber,
+        contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
+        contentVariables: JSON.stringify({
+          name:name,
+          yesOption:'read',
+          noOption:'read',
+        }),
+      })
     }
     else if (buttonId === 'yes_read') {
-      userSessions[whatsappNumber].readEmail = true;
-      await sendMessageOptions(whatsappNumber,
-        'Thanks for your confirmation, now, we will start the validations. Can you please log in to our call center using the credentials given in the email?',
-        [
-          {id:'yes_logged',title:'Yes I logged in'},
-          {id:'no_logged',title:'No I cannot log in'},
-        ]      
-      )
+      await client.messages.create({
+        from:twilioWhatsAppNumber,
+        to:whatsappNumber,
+        contentSid: 'HX962a2a42bfb1b318e13741083ea729bf',
+        contentVariables: JSON.stringify({
+          yesOption:'logged',
+          noOption:'logged',
+        }),
+      })
     }
     else if (buttonId === 'yes_logged') {
       userSessions[whatsappNumber].logged = true;
