@@ -140,8 +140,8 @@ export async function POST(req) {
         contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
         contentVariables: JSON.stringify({
           name:name,
-          yesOption:read,
-          noOption:read,
+          yesOption:'read',
+          noOption:'read',
         }),
       })
     }
