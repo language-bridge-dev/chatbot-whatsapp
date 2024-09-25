@@ -68,11 +68,8 @@ export async function POST(req) {
       console.log(number,solver);
       
       userSessions[number].waiting = false;
-      await sendMessageOption(number,
-        'The IT support solved the problem. Please press "CONTINUE" to proceed.',
-        {id:solver,text:'CONTINUE'}
-      );
-      await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
+      await problemSolved(number,solver)
+      await sendMessageReply(whatsappNumber,`Thank you, I notified the applicant.`)
       return new Response('', { status: 200 });
     }
 
@@ -261,3 +258,15 @@ const sendMessageReply = async function (number,message) {
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
   }
 }
+
+const problemSolved = async function (number,solver) {
+  await client.messages.create({
+    from:twilioWhatsAppNumber,
+    to:number,
+    contentSid: 'HXbeca98f80cc85b33fbf4c23144f78eca',
+    contentVariables: JSON.stringify({
+      solver:solver,
+    }),
+  })
+}
+// HXbeca98f80cc85b33fbf4c23144f78eca
