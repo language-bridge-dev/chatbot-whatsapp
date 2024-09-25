@@ -7,7 +7,7 @@ const client = new Twilio(accountSid, authToken);
 let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+201062791045';
-const supName = 'Romany'
+const supName = 'Romany Moner'
 
 function reminder() {  
   Object.keys(userSessions).forEach((number) => {
@@ -191,10 +191,11 @@ export async function POST(req) {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
       
-      const solvedID = `${whatsappNumber}_${buttonId.replace('no','yes')}`
+      const applicantwaNumber = whatsappNumber;
+      const solvedID = buttonId.replace('no','yes');
       console.log(solvedID);
       
-      await sendSupport(supNumber,supName,'HXe87111b01eadea8d90cfd8fb59914b8b',waID,buttonText,solvedID);
+      await sendSupport(supNumber,supName,'HX2d7b6595c201216bcc712ba8697237b1',waID,buttonText,applicantwaNumber,solvedID);
     }
     else {
       await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
@@ -232,7 +233,7 @@ const sendYesNoOption = async function (number,name,contentSID,step,option) {
   })
 }
 
-const sendSupport = async function (supNumber,name,contentSID,applicantNumber,problem,solvedID) {
+const sendSupport = async function (supNumber,name,contentSID,applicantNumber,problem,applicantwaNumber,solvedID) {
   await client.messages.create({
     from:twilioWhatsAppNumber,
     to:supNumber,
@@ -241,6 +242,7 @@ const sendSupport = async function (supNumber,name,contentSID,applicantNumber,pr
       supName:name,
       number:applicantNumber,
       problem:problem,
+      whatsappnumber:applicantwaNumber,
       solvedID:solvedID
     }),
   })
@@ -269,4 +271,3 @@ const problemSolved = async function (number,solver) {
     }),
   })
 }
-// HXbeca98f80cc85b33fbf4c23144f78eca
