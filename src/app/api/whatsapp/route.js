@@ -136,11 +136,9 @@ export async function POST(req) {
       )
     }
     else if (buttonId === 'no_read') {
-      await sendMessageOptions(whatsappNumber,
+      await sendMessageOption(whatsappNumber,
         'Please read it and when you finish, press "DONE".',
-        [
-          {type:'reply',reply:{id:'yes_read',title:'Done reading the email'}},
-        ]
+        {type:'reply',reply:{id:'yes_read',title:'Done reading the email'}},
       )
     }
     else if (buttonId === 'yes_read') {
@@ -224,16 +222,6 @@ export async function POST(req) {
 
 const sendMessageOptions = async function (number,message,options) {
   try {
-    // await client.messages.create({
-    //   from:twilioWhatsAppNumber,
-    //   to:number,
-    //   body:message,
-    //   interactive: {
-    //     type: 'button',
-    //     body: { text: message },
-    //     action: { buttons: options },
-    //   },
-    // })
     await client.messages.create({
       from:twilioWhatsAppNumber,
       to:number,
@@ -244,6 +232,24 @@ const sendMessageOptions = async function (number,message,options) {
           3: options[0].reply.id,
           4: options[1].reply.title,
           5: options[1].reply.id,
+        }),
+      })
+  } catch (error) {
+    console.error(`Failed to send message options: ${error}`);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
+  }
+}
+
+const sendMessageOption = async function (number,message,option) {
+  try {
+    await client.messages.create({
+      from:twilioWhatsAppNumber,
+      to:number,
+      contentSid: 'HX3eb4efa8fb8900593ed5d4e381e00e6d',
+      contentVariables: JSON.stringify({
+          1: message,
+          2: option.reply.title,
+          3: option.reply.id,
         }),
       })
   } catch (error) {
