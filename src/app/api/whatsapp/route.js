@@ -195,7 +195,7 @@ export async function POST(req) {
       const solvedID = buttonId.replace('no','yes');
       console.log(solvedID);
       
-      await sendSupport(supNumber,supName,'HX2d7b6595c201216bcc712ba8697237b1',waID,buttonText,applicantwaNumber,solvedID);
+      await sendSupport(supNumber,supName,'HX66619e631ae0e51072c1f76fd659fb85',waID,buttonText,applicantwaNumber,solvedID);
     }
     else {
       await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
@@ -243,7 +243,7 @@ const sendSupport = async function (supNumber,name,contentSID,applicantNumber,pr
       number:applicantNumber,
       problem:problem,
       whatsappnumber:applicantwaNumber,
-      solvedID:solvedID
+      solver:solvedID
     }),
   })
 }
