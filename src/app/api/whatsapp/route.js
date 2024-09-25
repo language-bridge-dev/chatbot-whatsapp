@@ -61,16 +61,16 @@ export async function POST(req) {
     const buttonId = params.get('ButtonPayload');
     const buttonText = params.get('ButtonText');
     
-    if (whatsappNumber === supNumber) {
-      const [number, solver] = buttonId.split(',');
-      userSessions[number].waiting = false;
-      await sendMessageOption(number,
-        'The IT support solved the problem. Please press "CONTINUE" to proceed.',
-        {id:solver,text:'CONTINUE'}
-      );
-      await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
-      return new Response('', { status: 200 });
-    }
+    // if (whatsappNumber === supNumber) {
+    //   const [number, solver] = buttonId.split(',');
+    //   userSessions[number].waiting = false;
+    //   await sendMessageOption(number,
+    //     'The IT support solved the problem. Please press "CONTINUE" to proceed.',
+    //     {id:solver,text:'CONTINUE'}
+    //   );
+    //   await sendMessageReply(whatsappNumber,`Thank you, I notified ${number}.`)
+    //   return new Response('', { status: 200 });
+    // }
 
     let [user, newUser] = getUserSession(whatsappNumber);
 
@@ -136,7 +136,7 @@ export async function POST(req) {
       // ])
       await client.messages.create({
         from:twilioWhatsAppNumber,
-        to:number,
+        to:whatsappNumber,
         contentSid: 'HXa0f997da03f784166d670e467bbe4b7b',
         contentVariables: JSON.stringify({
           name:name
