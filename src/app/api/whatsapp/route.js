@@ -166,9 +166,10 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\nUpload screenshot photo to continue.')
     }
     else if (buttonId === 'no_first_hung') {
-      await sendMessageOptions(whatsappNumber, 'Please hung up!\nClick "DONE" when you hung up.',[
+      await sendMessageOption(whatsappNumber,
+        'Please hung up!\nClick "DONE" when you hung up.',
         {type:'reply',reply:{id:'yes_first_hung',title:'DONE'}}
-      ])
+      )
     }
     else if (buttonId === 'yes_first_hung') {
       await sendMessageOptions(whatsappNumber, 'Great!\nWas the audio clear?',[
@@ -180,9 +181,10 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`)
     }
     else if (buttonId === 'no_hung') {
-      await sendMessageOptions(whatsappNumber,'Please hung up!\nClick "DONE" when you hung up',[
+      await sendMessageOption(whatsappNumber,
+        'Please hung up!\nClick "DONE" when you hung up',
         {type:'reply',reply:{id:'yes_hung',title:'DONE'}}
-      ])
+      )
     }
     else if (buttonId === 'yes_hung') {
       await sendMessageOptions(whatsappNumber,'Great!\nWas the audio clear for both calls?',[
@@ -201,11 +203,9 @@ export async function POST(req) {
     else if (buttonId === 'no_logged' || buttonId === 'no_see_calls' || buttonId === 'no_voice_clear' || buttonId === 'no_voice_clear_finish') {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
-      await sendMessageOptions(supNumber,
+      await sendMessageOption(supNumber,
         `Hello, applicant ${name} ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
-        [
           {type:'reply',reply:{id:`${whatsappNumber},${buttonId.replace('yes','no')}`,title:'DONE'}}
-        ]
       )
     }
     else {
@@ -225,7 +225,7 @@ const sendMessageOptions = async function (number,message,options) {
     await client.messages.create({
       from:twilioWhatsAppNumber,
       to:number,
-      contentSid: 'HX3eb4efa8fb8900593ed5d4e381e00e6d',
+      contentSid: 'HX8867e37db2e45a5060ff3b57983f96d5',
       contentVariables: JSON.stringify({
           1: message,
           2: options[0].reply.title,
@@ -245,7 +245,7 @@ const sendMessageOption = async function (number,message,option) {
     await client.messages.create({
       from:twilioWhatsAppNumber,
       to:number,
-      contentSid: 'HX3eb4efa8fb8900593ed5d4e381e00e6d',
+      contentSid: 'HXabb62a4134b2c52500cecc2b2c7d6efd',
       contentVariables: JSON.stringify({
           1: message,
           2: option.reply.title,
