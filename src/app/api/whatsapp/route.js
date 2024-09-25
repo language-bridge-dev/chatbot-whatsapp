@@ -65,6 +65,8 @@ export async function POST(req) {
     
     if (whatsappNumber === supNumber) {
       const [number, solver] = buttonId.split(/_(.+)/);
+      console.log(number,solver);
+      
       userSessions[number].waiting = false;
       await sendMessageOption(number,
         'The IT support solved the problem. Please press "CONTINUE" to proceed.',
@@ -193,6 +195,8 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
       
       const solvedID = whatsappNumber+buttonId.replace('no','yes')
+      console.log(solvedID);
+      
       await sendSupport(supNumber,supName,'HXe87111b01eadea8d90cfd8fb59914b8b',waID,buttonText,solvedID);
     }
     else {
