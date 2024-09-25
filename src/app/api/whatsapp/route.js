@@ -203,9 +203,10 @@ export async function POST(req) {
     else if (buttonId === 'no_logged' || buttonId === 'no_see_calls' || buttonId === 'no_voice_clear' || buttonId === 'no_voice_clear_finish') {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      const newId = whatsappNumber+','+buttonId.replace('yes','no')
       await sendMessageOption(supNumber,
-        `Hello, applicant ${name} ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
-          {id:`${whatsappNumber},${buttonId.replace('yes','no')}`,title:'DONE'},
+        `Hello, applicant ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
+        {id:newId,title:'DONE'},
       )
     }
     else {
