@@ -137,9 +137,11 @@ export async function POST(req) {
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:whatsappNumber,
-        contentSid: 'HXa0f997da03f784166d670e467bbe4b7b',
+        contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
         contentVariables: JSON.stringify({
-          name:name
+          name:name,
+          yesOption:read,
+          noOption:read,
         }),
       })
     }
