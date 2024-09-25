@@ -7,6 +7,7 @@ const client = new Twilio(accountSid, authToken);
 let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+201062791045';
+const supName = 'Romany'
 
 function reminder() {  
   Object.keys(userSessions).forEach((number) => {
@@ -57,6 +58,7 @@ export async function POST(req) {
     
     const name = params.get('ProfileName');
     const whatsappNumber = params.get('From');
+    const waID = params.get('WaId');
     const text = params.get('Body')?.toLowerCase().trim();
     const buttonId = params.get('ButtonPayload');
     const buttonText = params.get('ButtonText');
@@ -105,22 +107,30 @@ export async function POST(req) {
     if(screenshot){
       if(!user.firstScreenId) {
         userSessions[whatsappNumber].firstScreenId = screenshot;
-        await sendMessageOptions(whatsappNumber,
-          'Perfect, thanks for that screenshot. Have you hung up already?',[
-          {id:'yes_first_hung',title:'Yes I did hung up'},
-          {id:'no_first_hung',title:'No I did not hung up'},
-        ])
+        await client.messages.create({
+          from:twilioWhatsAppNumber,
+          to:whatsappNumber,
+          contentSid: 'HXfb581d2e44c8a55ecf43387a3b1d61c9',
+          contentVariables: JSON.stringify({
+            yesOption:'first_hung',
+            noOption:'first_hung',
+          }),
+        })
       }
       else if(!user.secondScreenId) {
         userSessions[whatsappNumber].secondScreenId = screenshot;
       }
       else if(!user.thirdScreenId) {
         userSessions[whatsappNumber].thirdScreenId = screenshot;
-        await sendMessageOptions(whatsappNumber,
-          'Perfect, thanks for the screenshots. Have you hung up already for both calls?',[
-          {id:'yes_hung',title:'Yes I did hung up for both calls'},
-          {id:'no_hung',title:'No I did not hung up for both calls'},
-        ])
+        await client.messages.create({
+          from:twilioWhatsAppNumber,
+          to:whatsappNumber,
+          contentSid: 'HX6bb587bb61f67980d3c4255d9e357622',
+          contentVariables: JSON.stringify({
+            yesOption:'hung',
+            noOption:'hung',
+          }),
+        })
       }
       else {
         await sendMessageReply(whatsappNumber,'You already added the 3 screenshots.\nPlease continue the steps or choose form the previous list.')
@@ -129,6 +139,7 @@ export async function POST(req) {
     }
 
     if (text === 'start') {
+      await sendMessageReply(whatsappNumber,`test number ${whatsappNumber} and test waid ${waID}`)
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:whatsappNumber,
@@ -141,70 +152,33 @@ export async function POST(req) {
       })
     }
     else if (buttonId === 'no_read') {
-      await client.messages.create({
-        from:twilioWhatsAppNumber,
-        to:whatsappNumber,
-        contentSid: 'HXef8fc98e5846a1a1dc1a6f2e12784fef',
-        contentVariables: JSON.stringify({
-          name:name,
-          step:'read it and when you finish press "CONTINUE"',
-          option:'read',
-        }),
-      })
+      await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','read the email','read');
     }
     else if (buttonId === 'yes_read') {
-      await client.messages.create({
-        from:twilioWhatsAppNumber,
-        to:whatsappNumber,
-        contentSid: 'HX962a2a42bfb1b318e13741083ea729bf',
-        contentVariables: JSON.stringify({
-          yesOption:'logged',
-          noOption:'logged',
-        }),
-      })
+      await sendYesNoOptions(whatsappNumber,'HX962a2a42bfb1b318e13741083ea729bf','logged');
     }
     else if (buttonId === 'yes_logged') {
       userSessions[whatsappNumber].logged = true;
-      await client.messages.create({
-        from:twilioWhatsAppNumber,
-        to:whatsappNumber,
-        contentSid: 'HXff58415e0a26cc8e8910c0d1e6d5f250',
-        contentVariables: JSON.stringify({
-          yesOption:'see_calls',
-          noOption:'see_calls',
-        }),
-      })
+      await sendYesNoOptions(whatsappNumber,'HXff58415e0a26cc8e8910c0d1e6d5f250','see_calls');
     }
     else if (buttonId === 'yes_see_calls') {
       userSessions[whatsappNumber].seeCalls = true;
       await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\nUpload screenshot photo to continue.')
     }
     else if (buttonId === 'no_first_hung') {
-      await sendMessageOption(whatsappNumber,
-        'Please hung up!\nClick "DONE" when you hung up.',
-        {id:'yes_first_hung',title:'DONE'},
-      )
+      await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','hung up','first_hung');
     }
     else if (buttonId === 'yes_first_hung') {
-      await sendMessageOptions(whatsappNumber, 'Great!\nWas the audio clear?',[
-        {id:'yes_voice_clear',title:'Yes the voice was clear'},
-        {id:'no_voice_clear',title:'No the voice was not clear'},
-      ])
+      await sendYesNoOptions(whatsappNumber,'HXba5fb13b7adcac70aaef22f297084833','voice_clear');
     }
     else if (buttonId === 'yes_voice_clear') {
       await sendMessageReply(whatsappNumber,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`)
     }
     else if (buttonId === 'no_hung') {
-      await sendMessageOption(whatsappNumber,
-        'Please hung up!\nClick "DONE" when you hung up',
-        {id:'yes_hung',title:'DONE'},
-      )
+      await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','hung up','hung')
     }
     else if (buttonId === 'yes_hung') {
-      await sendMessageOptions(whatsappNumber,'Great!\nWas the audio clear for both calls?',[
-        {id:'yes_voice_clear_finish',title:'Yes the voice was clear for both calls'},
-        {id:'no_voice_clear_finish',title:'No the voice was not clear for both calls'},
-      ])
+      await sendYesNoOptions(whatsappNumber,'HX60b49497f274ee35e97cd4dad027c286','voice_clear_finish');
     }
     else if (buttonId === 'yes_voice_clear_finish') {
       userSessions[whatsappNumber].done = true;
@@ -218,8 +192,9 @@ export async function POST(req) {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
       const newId = whatsappNumber+','+buttonId.replace('yes','no')
+      
       await sendMessageOption(supNumber,
-        `Hello, applicant ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
+        `Hello ${supName}, the applicant ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
         {id:newId,title:'DONE'},
       )
     }
@@ -234,42 +209,29 @@ export async function POST(req) {
   }
 }
 
-const sendMessageOptions = async function (number,message,options) {
-  try {
-    await client.messages.create({
-      from:twilioWhatsAppNumber,
-      to:number,
-      contentSid: 'HX8867e37db2e45a5060ff3b57983f96d5',
-      contentVariables: JSON.stringify({
-          1: message,
-          2: options[0].title,
-          3: options[0].id,
-          4: options[1].title,
-          5: options[1].id,
-        }),
-      })
-  } catch (error) {
-    console.error(`Failed to send message options: ${error}`);
-    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
-  }
+const sendYesNoOptions = async function (number,contentSID,option) {
+  await client.messages.create({
+    from:twilioWhatsAppNumber,
+    to:number,
+    contentSid: contentSID,
+    contentVariables: JSON.stringify({
+      yesOption:option,
+      noOption:option,
+    }),
+  })
 }
 
-const sendMessageOption = async function (number,message,option) {
-  try {
-    await client.messages.create({
-      from:twilioWhatsAppNumber,
-      to:number,
-      contentSid: 'HXabb62a4134b2c52500cecc2b2c7d6efd',
-      contentVariables: JSON.stringify({
-          1: message,
-          2: option.title,
-          3: option.id,
-        }),
-      })
-  } catch (error) {
-    console.error(`Failed to send message options: ${error}`);
-    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
-  }
+const sendYesNoOption = async function (number,name,contentSID,step,option) {
+  await client.messages.create({
+    from:twilioWhatsAppNumber,
+    to:number,
+    contentSid: contentSID,
+    contentVariables: JSON.stringify({
+      name:name,
+      step:step,
+      option:option,
+    }),
+  })
 }
 
 const sendMessageReply = async function (number,message) {
