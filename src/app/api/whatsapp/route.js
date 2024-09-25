@@ -139,7 +139,6 @@ export async function POST(req) {
     }
 
     if (text === 'start') {
-      await sendMessageReply(whatsappNumber,`test number ${whatsappNumber} and test waid ${waID}`)
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:whatsappNumber,
@@ -149,7 +148,7 @@ export async function POST(req) {
           yesOption:'read',
           noOption:'read',
         }),
-      })
+      });
     }
     else if (buttonId === 'no_read') {
       await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','read the email','read');
@@ -191,12 +190,9 @@ export async function POST(req) {
     else if (buttonId === 'no_logged' || buttonId === 'no_see_calls' || buttonId === 'no_voice_clear' || buttonId === 'no_voice_clear_finish') {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
-      const newId = whatsappNumber+','+buttonId.replace('yes','no')
       
-      await sendMessageOption(supNumber,
-        `Hello ${supName}, the applicant ${whatsappNumber} has a problem, his answer is (${buttonText})\nPlease press 'DONE' when you finish solving the problem.`,
-        {id:newId,title:'DONE'},
-      )
+      const solvedID = buttonId.slice(3)
+      await sendSupport(supNumber,supName,'HXf7456acf8f4f5c8bec4d04737cd9c205',waID,buttonText,whatsappNumber,solvedID);
     }
     else {
       await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
@@ -230,6 +226,21 @@ const sendYesNoOption = async function (number,name,contentSID,step,option) {
       name:name,
       step:step,
       option:option,
+    }),
+  })
+}
+
+const sendSupport = async function (number,name,contentSID,applicantNumber,problem,waApplicant,solvedID) {
+  await client.messages.create({
+    from:twilioWhatsAppNumber,
+    to:number,
+    contentSid: contentSID,
+    contentVariables: JSON.stringify({
+      supName:name,
+      number:applicantNumber,
+      problem:problem,
+      whatsappNumber:waApplicant,
+      solvedID:solvedID
     }),
   })
 }
