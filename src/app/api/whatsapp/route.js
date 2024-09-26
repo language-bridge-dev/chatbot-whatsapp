@@ -8,6 +8,7 @@ let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
 const hrNumber = '';
+const invliadMSGNum = 10
 
 function reminder() {  
   Object.keys(userSessions).forEach((number) => {
@@ -43,6 +44,7 @@ function getUserSession(number) {
       secondScreenId: null,
       thirdScreenId: null,
       waitingImage:false,
+      invlaidMessages:0,
       waiting:false,
       done:false,
       lastSendTime:Date.now()
@@ -216,6 +218,7 @@ export async function POST(req) {
       await sendSupport(supNumber,'HX23950f59981f081d6155fe3729163eaf',waID,whatsappNumber);
     }
     else {
+      userSessions[whatsappNumber].invlaidMessages+=1;
       await sendMessageReply(whatsappNumber,'Please, choose an option from the previous list');
     }
 

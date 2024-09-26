@@ -31,25 +31,25 @@ function getUserSession(chatId,applicantName) {
   return userSessions[chatId];
 }
 
-function reminder() {
-    console.log('Checking for reminders...');
+// function reminder() {
+//     console.log('Checking for reminders...');
     
-    Object.keys(userSessions).forEach((chatId) => {
-      const now = Date.now();
-      const session = userSessions[chatId];
+//     Object.keys(userSessions).forEach((chatId) => {
+//       const now = Date.now();
+//       const session = userSessions[chatId];
   
-      if (session.done || session.waiting) return;
+//       if (session.done || session.waiting) return;
   
-      const minutesSinceLastMessage = (now - session.lastSendTime) / 60000;
+//       const minutesSinceLastMessage = (now - session.lastSendTime) / 60000;
 
-      if (minutesSinceLastMessage >= 2 && minutesSinceLastMessage <= 10) {
-        console.log('sending a reminder');
-        bot.sendMessage(chatId, `Hello ${session.name}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
-      }
-    });
-}
+//       if (minutesSinceLastMessage >= 2 && minutesSinceLastMessage <= 10) {
+//         console.log('sending a reminder');
+//         bot.sendMessage(chatId, `Hello ${session.name}, please remember that you must complete this verification before your exam. Otherwise, it may be postponed or suspended.`);
+//       }
+//     });
+// }
 
-setInterval(reminder, 30000);
+// setInterval(reminder, 30000);
 
 function setLastSendTime(chatId) {
     userSessions[chatId].lastSendTime = Date.now();
