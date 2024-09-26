@@ -8,7 +8,7 @@ let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
 const hrNumber = 'whatsapp:+593991434326';
-const initiator = 'whatsapp:+201156596285'
+const initiator = 'whatsapp:+51945628224'
 const invalidMSGNum = 10
 
 function reminder() {  
@@ -172,8 +172,8 @@ export async function POST(req) {
     }
     else if (buttonId === 'yes_see_calls') {
       userSessions[whatsappNumber].seeCalls = true;
-      userSessions[whatsappNumber].waitingImage = true;
       await sendMessageReply(whatsappNumber, 'Perfect, please, call the *test call* with number *14049203888*. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\nUpload screenshot photo to continue.')
+      userSessions[whatsappNumber].waitingImage = true;
     }
     else if (buttonId === 'no_first_hung') {
       await sendYesNoOption(whatsappNumber,name,'HX43bc1c1f84ba338deddccef7b3bf1d56','hang up','first_hung');
