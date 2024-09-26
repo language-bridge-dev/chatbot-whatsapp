@@ -8,7 +8,7 @@ let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
 const hrNumber = 'whatsapp:+593991434326';
-const initiator = 'whatsapp:+51945628224'
+const initiator = 'whatsapp:+201156596285'
 const invalidMSGNum = 10
 
 function reminder() {  
@@ -182,8 +182,8 @@ export async function POST(req) {
       await sendYesNoOptions(whatsappNumber,'HXde028ba788bf9c07966650b66007e0b6','voice_clear');
     }
     else if (buttonId === 'yes_voice_clear') {
-      userSessions[whatsappNumber].waitingImage = true;
       await sendMessageReply(whatsappNumber,`Now, call the *test call* with number *14049203817*. This will connect you with the *ALTA* direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number *18884654648*.\nPlease send the 2 screenshots to continue.`)
+      userSessions[whatsappNumber].waitingImage = true;
     }
     else if (buttonId === 'no_hung') {
       await sendYesNoOption(whatsappNumber,name,'HX43bc1c1f84ba338deddccef7b3bf1d56','hang up','hung')
