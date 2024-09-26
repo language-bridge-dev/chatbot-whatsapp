@@ -8,7 +8,7 @@ let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
 const hrNumber = 'whatsapp:+593991434326';
-const initiator = 'whatsapp:+51945628224'
+const initiator = 'whatsapp:+201062791045'
 const invalidMSGNum = 10
 
 function reminder() {  
@@ -65,7 +65,7 @@ export async function POST(req) {
     const waID = params.get('WaId');
     const text = params.get('Body')?.toLowerCase().trim();
     const buttonId = params.get('ButtonPayload');
-    
+
     if (whatsappNumber === supNumber) {
       const [number, solver] = buttonId.split(/_(.+)/);
       console.log(number,solver);
@@ -77,6 +77,7 @@ export async function POST(req) {
 
     if (whatsappNumber === initiator) {
       let [newNumber,newName] = text.split(',');
+      newNumber = `whatsapp:+${newNumber}`;
       getUserSession(newNumber,newName);
       await client.messages.create({
         from:twilioWhatsAppNumber,
@@ -93,11 +94,6 @@ export async function POST(req) {
 
     let user = getUserSession(whatsappNumber);
     const name = user.name;
-    // options must be [{id:'ID',title:''}]    
-    // ID=> your id that coming in the request  title=> the text that showed in the user chat
-
-    // after 5 wrong messages (var)
-    // applicant not following the instractions.
 
     if (user.waiting) {
       await sendMessageReply(whatsappNumber,'Please, be patient and wait until the issue is solved');
