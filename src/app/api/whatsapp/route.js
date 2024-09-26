@@ -33,7 +33,24 @@ function setLastSendTime(number) {
   console.log('Updated user:', userSessions[number]);
 }
 
-function getUserSession(number,name) {
+function createApplicant(number,name){
+  userSessions[number] = {
+    name:name,
+    readEmail:false,
+    logged:false,
+    seeCalls:false,
+    firstScreenId: null,
+    secondScreenId: null,
+    thirdScreenId: null,
+    waitingImage:false,
+    invalidMessages:0,
+    waiting:false,
+    done:false,
+    lastSendTime:Date.now()
+  };
+}
+
+function getUserSession(number) {
   let newUser = false;
   if (!userSessions[number]) {
     newUser = true;
@@ -63,7 +80,7 @@ export async function POST(req) {
     
     const whatsappNumber = params.get('From');
     const waID = params.get('WaId');
-    const text = params.get('Body')?.toLowerCase().trim();
+    // const text = params.get('Body')?.toLowerCase().trim();
     const buttonId = params.get('ButtonPayload');
 
     if (whatsappNumber === supNumber) {
@@ -78,13 +95,14 @@ export async function POST(req) {
     if (whatsappNumber === initiator) {
       let [newNumber,newName] = params.get('Body').split(',');
       newNumber = `whatsapp:+${newNumber}`;
-      let newApplicant = getUserSession(newNumber,newName.trim());
+      createApplicant(newNumber,newName);
+      console.log(getUserSession(newNumber));
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:newNumber,
         contentSid: 'HX03991f1e7525d4ca3949640bbabe05d3',
         contentVariables: JSON.stringify({
-          name:newApplicant.name,
+          name:newName,
           yesOption:'read',
           noOption:'read',
         })
