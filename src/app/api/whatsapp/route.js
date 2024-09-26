@@ -7,10 +7,10 @@ const client = new Twilio(accountSid, authToken);
 let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
-// const hrNumber = 'whatsapp:+593991434326';
-// const initiator = 'whatsapp:+51945628224'
-const hrNumber = 'whatsapp:+201156596285';
-const initiator = 'whatsapp:+201156596285'
+const hrNumber = 'whatsapp:+593991434326';
+const initiator = 'whatsapp:+51945628224'
+// const hrNumber = 'whatsapp:+201156596285';
+// const initiator = 'whatsapp:+201156596285'
 const invalidMSGNum = 10
 
 function reminder() {  
