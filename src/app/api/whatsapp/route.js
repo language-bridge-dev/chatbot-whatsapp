@@ -7,7 +7,7 @@ const client = new Twilio(accountSid, authToken);
 let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
-// const supName = 'Romany Moner'
+const hrNumber = '';
 
 function reminder() {  
   Object.keys(userSessions).forEach((number) => {
@@ -42,6 +42,7 @@ function getUserSession(number) {
       firstScreenId: null,
       secondScreenId: null,
       thirdScreenId: null,
+      waitingImage:false,
       waiting:false,
       done:false,
       lastSendTime:Date.now()
@@ -77,18 +78,20 @@ export async function POST(req) {
     // options must be [{id:'ID',title:''}]    
     // ID=> your id that coming in the request  title=> the text that showed in the user chat
 
+    // after 5 wrong messages (var)
+    // applicant not following the instractions.
+
     if (user.waiting) {
-      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      await sendMessageReply(whatsappNumber,'Please, be patient and wait until the issue is solved')
+      return new Response('', { status: 200 });
+    }
+    
+    if (user.waitingImage) {
+      await sendMessageReply(whatsappNumber,'Please, provide the screenshot/s that we asked')
       return new Response('', { status: 200 });
     }
 
     if (user.done) {
-      await sendMessageReply(whatsappNumber,`You are already ready to take your ALTA evaluation. I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:
-            - You must use a computer. 
-            - You have to call the number 14049203888 and then enter the access code that has been provided via email.
-            - In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
-            \nThat's it for now. Thanks for your time`)
-    
       return new Response('', { status: 200 });
     }
 
@@ -105,6 +108,7 @@ export async function POST(req) {
     if(screenshot){
       if(!user.firstScreenId) {
         userSessions[whatsappNumber].firstScreenId = screenshot;
+        userSessions[whatsappNumber].waitingImage = false;
         await client.messages.create({
           from:twilioWhatsAppNumber,
           to:whatsappNumber,
@@ -120,6 +124,7 @@ export async function POST(req) {
       }
       else if(!user.thirdScreenId) {
         userSessions[whatsappNumber].thirdScreenId = screenshot;
+        userSessions[whatsappNumber].waitingImage = false;
         await client.messages.create({
           from:twilioWhatsAppNumber,
           to:whatsappNumber,
@@ -140,7 +145,7 @@ export async function POST(req) {
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:whatsappNumber,
-        contentSid: 'HX4d70768b429e3ccf72207ae99622e313',
+        contentSid: 'HXd3a64fe0bda7ba905ea09f7cfe14ee65',
         contentVariables: JSON.stringify({
           name:name,
           yesOption:'read',
@@ -160,7 +165,8 @@ export async function POST(req) {
     }
     else if (buttonId === 'yes_see_calls') {
       userSessions[whatsappNumber].seeCalls = true;
-      await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number 14049203888. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\nUpload screenshot photo to continue.')
+      userSessions[whatsappNumber].waitingImage = true;
+      await sendMessageReply(whatsappNumber, 'Perfect, please, call the test call with number *14049203888*. This will ask you to enter your access code. For the purpose of this test, enter any random code like 1111111. After entering this, you will hear that the code is incorrect. Don\'t worry, that is expected to happen. That will mean that the call was successful and the dial pad is working. Please, take a screenshot of this and after it, proceed to hang up the call.\nUpload screenshot photo to continue.')
     }
     else if (buttonId === 'no_first_hung') {
       await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','hung up','first_hung');
@@ -169,10 +175,11 @@ export async function POST(req) {
       await sendYesNoOptions(whatsappNumber,'HXba5fb13b7adcac70aaef22f297084833','voice_clear');
     }
     else if (buttonId === 'yes_voice_clear') {
-      await sendMessageReply(whatsappNumber,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.\nPlease send the 2 screenshots to continue.`)
+      userSessions[whatsappNumber].waitingImage = true;
+      await sendMessageReply(whatsappNumber,`Now, call the *test call* with number *14049203817*. This will connect you with the *ALTA* direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number *18884654648*.\nPlease send the 2 screenshots to continue.`)
     }
     else if (buttonId === 'no_hung') {
-      await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','hung up','hung')
+      await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','hang up','hung')
     }
     else if (buttonId === 'yes_hung') {
       await sendYesNoOptions(whatsappNumber,'HX60b49497f274ee35e97cd4dad027c286','voice_clear_finish');
@@ -182,32 +189,34 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber,
         `Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
         -	You must use a computer. 
-        -	You have to call the number 14049203888 and then enter the access code that has been provided via email.
-        -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
+        -	You have to call the number *14049203888* and then enter the access code that has been provided via email.
+        -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers *14049203817* or *18884654648*. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
         \nThat’s it for now. Thanks for your time`)
+
+      //await sendMessageReply() to the support to notify him
     }
     else if (buttonId === 'no_logged') {
       userSessions[whatsappNumber].waiting = true;
-      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
-      await sendSupport(supNumber,'HX5116bc28d6879593741f57dd6aad69c0',waID,whatsappNumber);
+      await sendMessageReply(whatsappNumber,'A technical assistant from our team will contact you. Please, be patient.')
+      await sendSupport(supNumber,'HX5116bc28d6879593741f57dd6aad69c0',name,waID,whatsappNumber);
     }
     else if (buttonId === 'no_see_calls') {
       userSessions[whatsappNumber].waiting = true;
-      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
-      await sendSupport(supNumber,'HXafde30b58c78afe57b59a1cc35f7f8d2',waID,whatsappNumber);
+      await sendMessageReply(whatsappNumber,'A technical assistant from our team will contact you. Please, be patient.')
+      await sendSupport(supNumber,'HXafde30b58c78afe57b59a1cc35f7f8d2',name,waID,whatsappNumber);
     }
     else if (buttonId === 'no_voice_clear') {
       userSessions[whatsappNumber].waiting = true;
-      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
-      await sendSupport(supNumber,'HXd73bfec78e24b0cbcc41ff94de772d3f',waID,whatsappNumber);
+      await sendMessageReply(whatsappNumber,'A technical assistant from our team will contact you. Please, be patient.')
+      await sendSupport(supNumber,'HXd73bfec78e24b0cbcc41ff94de772d3f',name,waID,whatsappNumber);
     }
     else if (buttonId === 'no_voice_clear_finish') {
       userSessions[whatsappNumber].waiting = true;
-      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      await sendMessageReply(whatsappNumber,'A technical assistant from our team will contact you. Please, be patient.')
       await sendSupport(supNumber,'HX23950f59981f081d6155fe3729163eaf',waID,whatsappNumber);
     }
     else {
-      await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
+      await sendMessageReply(whatsappNumber,'Please, choose an option from the previous list');
     }
 
     return new Response('', { status: 200 });
@@ -242,10 +251,10 @@ const sendYesNoOption = async function (number,name,contentSID,step,option) {
   })
 }
 
-const sendSupport = async function (supNumber,contentSID,applicantNumber,applicantWA) {
+const sendSupport = async function (number,contentSID,applicantNumber,applicantWA) {
   await client.messages.create({
     from:twilioWhatsAppNumber,
-    to:supNumber,
+    to:number,
     contentSid: contentSID,
     contentVariables: JSON.stringify({
       applicantNumber:applicantNumber,
