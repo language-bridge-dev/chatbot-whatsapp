@@ -6,8 +6,8 @@ const client = new Twilio(accountSid, authToken);
 
 let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
-const supNumber = 'whatsapp:+201062791045';
-const supName = 'Romany Moner'
+const supNumber = 'whatsapp:+573197741990';
+// const supName = 'Romany Moner'
 
 function reminder() {  
   Object.keys(userSessions).forEach((number) => {
@@ -169,7 +169,7 @@ export async function POST(req) {
       await sendYesNoOptions(whatsappNumber,'HXba5fb13b7adcac70aaef22f297084833','voice_clear');
     }
     else if (buttonId === 'yes_voice_clear') {
-      await sendMessageReply(whatsappNumber,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.`)
+      await sendMessageReply(whatsappNumber,`Now, call the test call with number 14049203817. This will connect you with the ALTA direct line. If you manage to hear the options provided by the automatic responder, take a screenshot of it, and hang up the call. Repeat this with the number 18884654648.\nPlease send the 2 screenshots to continue.`)
     }
     else if (buttonId === 'no_hung') {
       await sendYesNoOption(whatsappNumber,name,'HX1e0e2461298dd5d4180e40d4ada7f244','hung up','hung')
