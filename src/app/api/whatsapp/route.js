@@ -8,7 +8,7 @@ let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
 const hrNumber = 'whatsapp:+593991434326';
-const initiator = 'whatsapp:+201062791045'
+const initiator = 'whatsapp:+51945628224'
 const invalidMSGNum = 10
 
 function reminder() {  
@@ -76,7 +76,7 @@ export async function POST(req) {
     }
 
     if (whatsappNumber === initiator) {
-      let [newNumber,newName] = text.split(',');
+      let [newNumber,newName] = params.get('Body').split(',').trim();
       newNumber = `whatsapp:+${newNumber}`;
       getUserSession(newNumber,newName);
       await client.messages.create({
