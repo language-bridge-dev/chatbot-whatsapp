@@ -66,7 +66,6 @@ export async function POST(req) {
     if (whatsappNumber === supNumber) {
       const [number, solver] = buttonId.split(/_(.+)/);
       console.log(number,solver);
-      
       userSessions[number].waiting = false;
       await problemSolved(number,solver)
       await sendMessageReply(whatsappNumber,`Thank you, I notified the applicant.`)
@@ -187,15 +186,25 @@ export async function POST(req) {
         -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers 14049203817 or 18884654648. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
         \nThat’s it for now. Thanks for your time`)
     }
-    else if (buttonId === 'no_logged' || buttonId === 'no_see_calls' || buttonId === 'no_voice_clear' || buttonId === 'no_voice_clear_finish') {
+    else if (buttonId === 'no_logged') {
       userSessions[whatsappNumber].waiting = true;
       await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
-      
-      const applicantwaNumber = whatsappNumber;
-      const solvedID = buttonId.replace('no','yes');
-      console.log(solvedID);
-      
-      await sendSupport(supNumber,supName,'HXc3018dcc0abd4f5e07c3432e68e2c641',waID,buttonText,applicantwaNumber,solvedID);
+      await sendSupport(supNumber,'HX5116bc28d6879593741f57dd6aad69c0',waID,whatsappNumber);
+    }
+    else if (buttonId === 'no_see_calls') {
+      userSessions[whatsappNumber].waiting = true;
+      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      await sendSupport(supNumber,'HXafde30b58c78afe57b59a1cc35f7f8d2',waID,whatsappNumber);
+    }
+    else if (buttonId === 'no_voice_clear') {
+      userSessions[whatsappNumber].waiting = true;
+      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      await sendSupport(supNumber,'HXd73bfec78e24b0cbcc41ff94de772d3f',waID,whatsappNumber);
+    }
+    else if (buttonId === 'no_voice_clear_finish') {
+      userSessions[whatsappNumber].waiting = true;
+      await sendMessageReply(whatsappNumber,'A techincal assistant from our team will contact you. Please, be patient.')
+      await sendSupport(supNumber,'HX23950f59981f081d6155fe3729163eaf',waID,whatsappNumber);
     }
     else {
       await sendMessageReply(whatsappNumber,'Please choose an option form the previous list');
@@ -233,17 +242,14 @@ const sendYesNoOption = async function (number,name,contentSID,step,option) {
   })
 }
 
-const sendSupport = async function (supNumber,name,contentSID,applicantNumber,problem,applicantwaNumber,solvedID) {
+const sendSupport = async function (supNumber,contentSID,applicantNumber,applicantWA) {
   await client.messages.create({
     from:twilioWhatsAppNumber,
     to:supNumber,
     contentSid: contentSID,
     contentVariables: JSON.stringify({
-      supName:name,
-      number:applicantNumber,
-      problem:problem,
-      whatsappnumber:applicantwaNumber,
-      solver:solvedID
+      applicantNumber:applicantNumber,
+      applicantWA:applicantWA,
     }),
   })
 }
@@ -271,3 +277,4 @@ const problemSolved = async function (number,solver) {
     }),
   })
 }
+
