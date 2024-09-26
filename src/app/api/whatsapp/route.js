@@ -99,22 +99,17 @@ export async function POST(req) {
       await sendMessageReply(whatsappNumber,'Please, be patient and wait until the issue is solved');
       return new Response('', { status: 200 });
     }
-    
-    if (user.waitingImage) {
-      await sendMessageReply(whatsappNumber,'Please, provide the screenshot/s that we asked')
-      return new Response('', { status: 200 });
-    }
 
     if (user.done) {
       return new Response('', { status: 200 });
     }
 
-    if (user.invalidMessages >= invalidMSGNum){
-      await sendMessageReply(whatsappNumber,'Please, wait until one member of our IT support gets in contact with you.')
+    setLastSendTime(whatsappNumber);
+    
+    if (user.waitingImage) {
+      await sendMessageReply(whatsappNumber,'Please, provide the screenshot/s that we asked')
       return new Response('', { status: 200 });
     }
-
-    setLastSendTime(whatsappNumber);
 
     if(params.get('NumMedia') == 1 && params.get('MessageType') != 'image') {
       await sendMessageReply(whatsappNumber,`Please, upload screenshot as a photo!\nDo not upload it as a file.`);
@@ -159,7 +154,10 @@ export async function POST(req) {
       }
       return new Response('', { status: 200 });
     }
-
+    if (user.invalidMessages >= invalidMSGNum){
+      await sendMessageReply(whatsappNumber,'Please, wait until one member of our IT support gets in contact with you.')
+      return new Response('', { status: 200 });
+    }
 
     if (buttonId === 'no_read') {
       await sendYesNoOption(whatsappNumber,name,'HX43bc1c1f84ba338deddccef7b3bf1d56','read the email','read');
