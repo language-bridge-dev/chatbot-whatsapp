@@ -104,13 +104,13 @@ export async function POST(req) {
       return new Response('', { status: 200 });
     }
 
-    setLastSendTime(whatsappNumber);
-    
-    if (user.waitingImage) {
-      await sendMessageReply(whatsappNumber,'Please, provide the screenshot/s that we asked')
+    if (user.invalidMessages >= invalidMSGNum){
+      await sendMessageReply(whatsappNumber,'Please, wait until one member of our IT support gets in contact with you.')
       return new Response('', { status: 200 });
     }
 
+    setLastSendTime(whatsappNumber);
+    
     if(params.get('NumMedia') == 1 && params.get('MessageType') != 'image') {
       await sendMessageReply(whatsappNumber,`Please, upload screenshot as a photo!\nDo not upload it as a file.`);
       return new Response('', { status: 200 });
@@ -154,8 +154,9 @@ export async function POST(req) {
       }
       return new Response('', { status: 200 });
     }
-    if (user.invalidMessages >= invalidMSGNum){
-      await sendMessageReply(whatsappNumber,'Please, wait until one member of our IT support gets in contact with you.')
+    
+    if (user.waitingImage) {
+      await sendMessageReply(whatsappNumber,'Please, provide the screenshot/s that we asked')
       return new Response('', { status: 200 });
     }
 
