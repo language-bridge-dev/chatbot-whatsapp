@@ -77,8 +77,8 @@ export async function POST(req) {
 
     if (whatsappNumber === initiator) {
       let [newNumber,newName] = params.get('Body').split(',');
-      newNumber.trim() = `whatsapp:+${newNumber}`;
-      getUserSession(newNumber,newName);
+      newNumber = `whatsapp:+${newNumber}`;
+      getUserSession(newNumber.trim(),newName.trim());
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:newNumber,
