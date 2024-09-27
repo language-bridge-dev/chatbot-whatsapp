@@ -7,8 +7,9 @@ const client = new Twilio(accountSid, authToken);
 let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
-const hrNumber = 'whatsapp:+593991434326';
-const initiator = 'whatsapp:+51945628224'
+// const hrNumber = 'whatsapp:+593991434326';
+const initiator = 'whatsapp:+51945628224';
+const hrNumber = 'whatsapp:+201553779224';
 // const hrNumber = 'whatsapp:+201156596285';
 // const initiator = 'whatsapp:+201156596285'
 const invalidMSGNum = 10
@@ -200,8 +201,16 @@ export async function POST(req) {
         -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers *14049203817* or *18884654648*. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
         \nThat’s it for now. Thanks for your time`)
 
-      await sendMessageReply(hrNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`)
-      await sendMessageReply(supNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`)
+      await sendMessageReply(hrNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`).then((res) => {
+        console.log('message sent to hr successfully'+res);
+      }).catch(err=>{
+        console.log(err);
+      })
+      await sendMessageReply(supNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`).then((res) => {
+        console.log('message sent to support successfully'+res);
+      }).catch(err=>{
+        console.log(err);
+      })
 
       //await sendMessageReply() to the support to notify him
     }
