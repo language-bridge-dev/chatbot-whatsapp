@@ -198,22 +198,11 @@ export async function POST(req) {
     else if (buttonId === 'yes_voice_clear_finish') {
       userSessions[whatsappNumber].done = true;
       await sendMessageReply(whatsappNumber,
-        `Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n
-        -	You must use a computer. 
-        -	You have to call the number *14049203888* and then enter the access code that has been provided via email.
-        -	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers *14049203817* or *18884654648*. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.
-        \nThat’s it for now. Thanks for your time`)
-
-      await sendMessageReply(hrNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`).then((res) => {
-        console.log('message sent to hr successfully'+res);
-      }).catch(err=>{
-        console.log(err);
-      })
-      await sendMessageReply(supNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`).then((res) => {
-        console.log('message sent to support successfully'+res);
-      }).catch(err=>{
-        console.log(err);
-      })
+        `Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n-You must use a computer.\n-	You have to call the number *14049203888* and then enter the access code that has been provided via email.\n-	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers *14049203817* or *18884654648*. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.\nThat’s it for now. Thanks for your time`);
+      await sendMessageReply(supNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`);
+      await sendMessageReply(hrNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`);
+      console.log('DONE');
+      
     }
     else if (buttonId === 'no_logged') {
       userSessions[whatsappNumber].waiting = true;
