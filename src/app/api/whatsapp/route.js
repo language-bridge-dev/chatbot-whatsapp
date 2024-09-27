@@ -200,6 +200,7 @@ export async function POST(req) {
         \nThat’s it for now. Thanks for your time`)
 
       await sendMessageReply(hrNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`)
+      await sendMessageReply(supNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`)
 
       //await sendMessageReply() to the support to notify him
     }
