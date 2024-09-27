@@ -75,7 +75,8 @@ export async function POST(req) {
 
     if (whatsappNumber === initiator) {
       let [newNumber,newName] = params.get('Body').split(',');
-      newNumber = `whatsapp:+${newNumber}`;
+      newName = newName.trim();
+      newNumber = `whatsapp:+${newNumber.trim()}`;
       createApplicant(newNumber,newName);
       console.log(userSessions[newNumber]);
       await client.messages.create({
