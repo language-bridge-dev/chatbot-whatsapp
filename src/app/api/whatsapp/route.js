@@ -8,8 +8,10 @@ let userSessions = {};
 const twilioWhatsAppNumber = 'whatsapp:+18633445007';
 const supNumber = 'whatsapp:+573197741990';
 // const hrNumber = 'whatsapp:+593991434326';
-const initiator = 'whatsapp:+51945628224';
-const hrNumber = 'whatsapp:+201553779224';
+const initiator = 'whatsapp:+201062791045';
+const hrNumber = 'whatsapp:+33777159771';
+// const initiator = 'whatsapp:+51945628224';
+// const hrNumber = 'whatsapp:+201553779224';
 // const hrNumber = 'whatsapp:+201156596285';
 // const initiator = 'whatsapp:+201156596285'
 const invalidMSGNum = 10
@@ -211,8 +213,6 @@ export async function POST(req) {
       }).catch(err=>{
         console.log(err);
       })
-
-      //await sendMessageReply() to the support to notify him
     }
     else if (buttonId === 'no_logged') {
       userSessions[whatsappNumber].waiting = true;
