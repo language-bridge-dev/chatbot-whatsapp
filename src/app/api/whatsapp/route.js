@@ -93,7 +93,7 @@ export async function POST(req) {
     }
 
     let user = userSessions[whatsappNumber];
-    const name = user.name;
+    const name = (user.name===undefined)?params.get('ProfileName'):user.name;
 
     if (user.waiting) {
       await sendMessageReply(whatsappNumber,'Please, be patient and wait until the issue is solved');
