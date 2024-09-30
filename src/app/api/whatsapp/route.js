@@ -6,17 +6,10 @@ const client = new Twilio(accountSid, authToken);
 
 let userSessions = {};
 
-const twilioWhatsAppNumber = 'whatsapp:+18633445007';
-// const supNumber = 'whatsapp:+51989900283';
-const hrNumber = 'whatsapp:+593991434326';
-const supNumber = 'whatsapp:+573197741990';
-const initiator = 'whatsapp:+51945628224';
-// const initiator = 'whatsapp:+201062791045';
-// const hrNumber = 'whatsapp:+51945628224';
-// const hrNumber = 'whatsapp:+201553779224';
-// const hrNumber = 'whatsapp:+201156596285';
-// const initiator = 'whatsapp:+201156596285'
-const invalidMSGNum = 10
+const twilioWhatsAppNumber = process.env.TWILIO_NUMBER;
+const hrNumber = process.env.HR_NUMBER;
+const supNumber = process.env.SUPPORT_NUMBER;
+const invalidMSGNum = 10;
 
 function reminder() {  
   Object.keys(userSessions).forEach((number) => {
@@ -37,7 +30,6 @@ setInterval(reminder, 30000);
 
 function setLastSendTime(number) {
   userSessions[number].lastSendTime = Date.now();
-  console.log('Updated user:', userSessions[number]);
 }
 
 function createApplicant(number,name){
@@ -61,29 +53,24 @@ function createApplicant(number,name){
 export async function POST(req) {
   try {
     const body = await req.text();
-    const params = new URLSearchParams(body);
-    console.log(params);
-    
+    const params = new URLSearchParams(body);    
     const whatsappNumber = params.get('From');
     const waID = params.get('WaId');
-    // const text = params.get('Body')?.toLowerCase().trim();
     const buttonId = params.get('ButtonPayload');
 
-    if (whatsappNumber === supNumber) {
+    if (whatsappNumber === supNumber &&  (params.get('Body').split(',').length !== 2)) {
       const [number, solver] = buttonId.split(/_(.+)/);
-      console.log(number,solver);
       userSessions[number].waiting = false;
       await problemSolved(number,solver);
       await sendMessageReply(whatsappNumber,`Thank you, I notified the applicant.`);
       return new Response('', { status: 200 });
     }
 
-    if (whatsappNumber === initiator) {
+    if (whatsappNumber === hrNumber || whatsappNumber === supNumber) {
       let [newNumber,newName] = params.get('Body').split(',');
       newName = newName.trim();
       newNumber = `whatsapp:+${newNumber.trim()}`;
       createApplicant(newNumber,newName);
-      console.log(userSessions[newNumber]);
       await client.messages.create({
         from:twilioWhatsAppNumber,
         to:newNumber,
@@ -202,7 +189,6 @@ export async function POST(req) {
         `Perfect, all the validations have been done successfully. You are ready to take your ALTA evaluation. Tomorrow, I will contact you one hour before your exam to run these validations again to make sure everything is ok. Please, remember the following considerations for your evaluation:\n-You must use a computer.\n-	You have to call the number *14049203888* and then enter the access code that has been provided via email.\n-	In case the access code doesn't work, hang up the call immediately and call any of the Contingency Numbers *14049203817* or *18884654648*. In any of these lines, you must explain the issue that you have experienced, providing your identification and access code, and require them to proceed with the evaluation.\nThat’s it for now. Thanks for your time`);
       await sendMessageReply(supNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`);
       await sendMessageReply(hrNumber,`The applicant ${name} ${waID} has finished the first check for the ALTA evaluation.`);
-      console.log('DONE');
       
     }
     else if (buttonId === 'no_logged') {
@@ -234,7 +220,7 @@ export async function POST(req) {
         await sendMessageReply(whatsappNumber,'Please, choose an option from the previous list');
       }
     }
-
+    
     return new Response('', { status: 200 });
   } catch (error) {
     console.error('Error handling WhatsApp webhook:', error);
@@ -243,41 +229,56 @@ export async function POST(req) {
 }
 
 const sendYesNoOptions = async function (number,contentSID,option) {
-  await client.messages.create({
-    from:twilioWhatsAppNumber,
-    to:number,
-    contentSid: contentSID,
-    contentVariables: JSON.stringify({
-      yesOption:option,
-      noOption:option,
-    }),
-  })
+  try{
+    await client.messages.create({
+      from:twilioWhatsAppNumber,
+      to:number,
+      contentSid: contentSID,
+      contentVariables: JSON.stringify({
+        yesOption:option,
+        noOption:option,
+      }),
+    })
+  } catch (error) {
+    console.error(`Failed to send message options: ${error}`);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
+  }
 }
 
 const sendYesNoOption = async function (number,name,contentSID,step,option) {
-  await client.messages.create({
-    from:twilioWhatsAppNumber,
-    to:number,
-    contentSid: contentSID,
-    contentVariables: JSON.stringify({
-      name:name,
-      step:step,
-      option:option,
-    }),
-  })
+  try {
+    await client.messages.create({
+      from:twilioWhatsAppNumber,
+      to:number,
+      contentSid: contentSID,
+      contentVariables: JSON.stringify({
+        name:name,
+        step:step,
+        option:option,
+      }),
+    })
+  } catch (error) {
+    console.error(`Failed to send message options: ${error}`);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
+  }
 }
 
 const sendSupport = async function (number,contentSID,applicantName,applicantNumber,applicantWA) {
-  await client.messages.create({
-    from:twilioWhatsAppNumber,
-    to:number,
-    contentSid: contentSID,
-    contentVariables: JSON.stringify({
-      name:applicantName,
-      applicantNumber:applicantNumber,
-      applicantWA:applicantWA,
-    }),
-  })
+  try {
+    await client.messages.create({
+      from:twilioWhatsAppNumber,
+      to:number,
+      contentSid: contentSID,
+      contentVariables: JSON.stringify({
+        name:applicantName,
+        applicantNumber:applicantNumber,
+        applicantWA:applicantWA,
+      }),
+    })
+  } catch (error) {
+    console.error(`Failed to send message options: ${error}`);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
+  }
 }
 
 const sendMessageReply = async function (number,message) {
@@ -294,17 +295,27 @@ const sendMessageReply = async function (number,message) {
 }
 
 const problemSolved = async function (number,solver) {
-  await client.messages.create({
-    from:twilioWhatsAppNumber,
-    to:number,
-    contentSid: 'HX73c114169d8bc2f36938a81ee4043f03',
-    contentVariables: JSON.stringify({
-      solver:solver,
-    }),
-  })
+  try {
+    await client.messages.create({
+      from:twilioWhatsAppNumber,
+      to:number,
+      contentSid: 'HX73c114169d8bc2f36938a81ee4043f03',
+      contentVariables: JSON.stringify({
+        solver:solver,
+      }),
+    })
+  } catch (error) {
+    console.error(`Failed to send message options: ${error}`);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
+  }
 }
 
 const invalidMessages = async function (number,name,waID) {
-  await sendMessageReply(number,'It seems you have doubts about how to proceed. I will refer you to our IT department so you can get assistance.');
-  await sendMessageReply(supNumber,`The applicant is not following the instructions.\n${name} ${waID}`);
+  try {
+    await sendMessageReply(number,'It seems you have doubts about how to proceed. I will refer you to our IT department so you can get assistance.');
+    await sendMessageReply(supNumber,`The applicant is not following the instructions.\n${name} ${waID}`);
+  } catch (error) {
+    console.error(`Failed to send message options: ${error}`);
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), { status: 500 });
+  }
 }
